@@ -97,7 +97,7 @@ const ratio = (n: number, d: number) => d ? `${n}/${d} (${Math.round(100 * n / d
 export function scorecard(results: Results, review?: Review, strict = false): string {
   if (review) assert.equal(review.resultsHash, hash(results), "Review belongs to different results.");
   const graded = results.scans.filter(scan => scan.stage <= 2).map(scan => grade(results, scan, review, strict));
-  const lines = ["# Foldy quality benchmark", "", `Model: ${results.manifest.modelTag}. Base commit: ${results.manifest.commit}; evaluated working-tree code is saved in source-snapshot.json.`, "",
+  const lines = ["# Foldy quality benchmark", "", `Provider: ${results.manifest.provider ?? "ollama"}. Model: ${results.manifest.modelTag}. Base commit: ${results.manifest.commit}; evaluated working-tree code is saved in source-snapshot.json.`, "",
     `Run ${results.finished ? "finished" : "unfinished"}: ${results.scans.length}/${results.cases.length * results.trials * 3} scans. Reviewer: ${review?.reviewer ?? "none — semantics unreviewed"}.`, "",
     ...((results.manifest.codeChangesDuringRun as string[] | undefined)?.length
       ? [`INVALID COLLECTION: evaluated code changed during this run: ${(results.manifest.codeChangesDuringRun as string[]).join(", ")}.`, ""] : []),
@@ -226,6 +226,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       liveWallMs: value.scans.filter(s => s.stage <= 2).reduce((sum, s) => sum + s.wallMs, 0),
     });
     console.log(JSON.stringify({ comparison: { baseline: summary(prior.results, priorRows), current: summary(results, currentRows),
+      baselineProvider: prior.results.manifest.provider ?? "ollama", currentProvider: results.manifest.provider ?? "ollama",
       baselineModel: prior.results.manifest.modelTag, currentModel: results.manifest.modelTag,
       caution: "Inspect per-case grades and configuration changes. Unreviewed stages are not passes; claims can differ, so totals alone are not comparable accuracy." } }, null, 2));
     console.log("\nPer-case comparison (baseline → current):");

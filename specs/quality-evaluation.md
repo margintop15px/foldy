@@ -10,6 +10,8 @@ Latest scope update: the user asked to finish PDF parsing without spending more 
 
 ## What we need to measure
 
+Temporary OpenAI testing is available through `FOLDY_PROVIDER=openai` and `OPENAI_API_KEY`, defaulting to `gpt-4.1-mini`. The benchmark keeps the same synthetic assets, prompts, tools and grading rules, records the provider/model, and uses fresh state for each trial. Remote runs send inspected fixture context to OpenAI. Their timing and quality must be measured and reported separately; they do not replace local-model regression evidence. The setup and commands are in the [benchmark guide](../benchmarks/README.md).
+
 Measure whether Foldy produces useful conclusions supported by the right, current evidence. Keep system correctness, semantic quality, and operating cost separate. A large number of findings, valid JSON, or a successful exit is not evidence of good understanding.
 
 The existing offline suite verifies boundaries, persistence, quotation matching, budgets, and recovery. Its scripted models do not measure local-model reasoning. The two live checks establish narrow examples of useful behavior, not quality across domains.

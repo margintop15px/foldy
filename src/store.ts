@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { inspectionCoverage, type Inventory, type Source } from "./inventory.ts";
-import { type ModelInfo } from "./model.ts";
+import { type ModelInfo, type ModelProvider } from "./model.ts";
 import { EXTRACTOR_REVISION, type DocumentCoverage, type DocumentPage, type PreviewInfo } from "./documents.ts";
 
 interface EvidenceSource {
@@ -37,7 +37,7 @@ export interface Finding {
 }
 
 interface SavedSource { id: string; path: string; version: string | null; verified: number; metadata: string }
-interface SavedRun { model_tag: string | null; model_info: string | null; pending: number; analysis_revision: string | null }
+interface SavedRun { model_provider: ModelProvider; model_tag: string | null; model_info: string | null; pending: number; analysis_revision: string | null }
 
 // Resolve existing ancestors before mkdir, including an override reached through a symlink.
 async function canonicalLocation(path: string): Promise<string> {
@@ -105,7 +105,7 @@ export async function openStore(root: string, stateDir: string | undefined, anal
       active = true;
     }
     const states = db.prepare("SELECT * FROM state").all();
-    if (states.length !== 1 || states[0]!.root !== root || ![1, 2, 3].includes(Number(states[0]!.schema_version))) {
+    if (states.length !== 1 || states[0]!.root !== root || ![1, 2, 3, 4].includes(Number(states[0]!.schema_version))) {
       throw new Error("Database root or schema does not match; existing knowledge was not reset.");
     }
     if (states[0]!.schema_version === 1) {
@@ -118,12 +118,15 @@ export async function openStore(root: string, stateDir: string | undefined, anal
           metadata TEXT NOT NULL, preview BLOB, PRIMARY KEY(version, revision, page));
         UPDATE state SET schema_version = 3`);
     }
+    if (Number(states[0]!.schema_version) < 4) {
+      db.exec("ALTER TABLE state ADD COLUMN model_provider TEXT NOT NULL DEFAULT 'ollama'; UPDATE state SET schema_version = 4");
+    }
     // Preparing these also rejects a missing/incompatible table, even on an empty scan.
     for (const sql of ["SELECT id, path, version, present, verified, metadata FROM sources",
       "SELECT source_id, version, text, inspected, observed_at, document FROM versions", "SELECT version, bytes FROM binaries",
       "SELECT version, revision, page, metadata, preview FROM document_cache", "SELECT id, signature, data, current FROM findings",
-      "SELECT finding_id, source_id, version FROM evidence", "SELECT model_tag, model_info, pending, analysis_revision FROM state"]) db.prepare(sql);
-    previous = db.prepare("SELECT model_tag, model_info, pending, analysis_revision FROM state").get() as unknown as SavedRun;
+      "SELECT finding_id, source_id, version FROM evidence", "SELECT model_provider, model_tag, model_info, pending, analysis_revision FROM state"]) db.prepare(sql);
+    previous = db.prepare("SELECT model_provider, model_tag, model_info, pending, analysis_revision FROM state").get() as unknown as SavedRun;
     if (previous.analysis_revision !== analysisRevision) {
       // Preserve history, but do not serve conclusions produced under superseded evidence rules.
       db.exec("UPDATE findings SET current = 0");
@@ -268,15 +271,15 @@ export async function openStore(root: string, stateDir: string | undefined, anal
       db.prepare("UPDATE sources SET verified = 0 WHERE id = ?").run(sourceId);
       db.prepare("UPDATE findings SET current = 0 WHERE id IN (SELECT finding_id FROM evidence WHERE source_id = ?)").run(sourceId);
     },
-    save(sources: Source[], modelTag: string, model: ModelInfo | undefined, pending: boolean) {
+    save(sources: Source[], modelTag: string, model: ModelInfo | undefined, pending: boolean, provider: ModelProvider) {
       for (const source of sources) {
         if (source.version) db.prepare("UPDATE versions SET inspected = ?, document = ? WHERE source_id = ? AND version = ?")
           .run(JSON.stringify(source.inspected), source.document ? JSON.stringify(source.document) : null, source.sourceId!, source.version);
         const { text: _text, inspected: _inspected, ...metadata } = source;
         db.prepare("UPDATE sources SET metadata = ? WHERE id = ?").run(JSON.stringify(metadata), source.sourceId!);
       }
-      db.prepare("UPDATE state SET model_tag = ?, model_info = ?, pending = ?, analysis_revision = ?")
-        .run(modelTag, model ? JSON.stringify(model) : null, Number(pending), analysisRevision);
+      db.prepare("UPDATE state SET model_tag = ?, model_info = ?, pending = ?, analysis_revision = ?, model_provider = ?")
+        .run(modelTag, model ? JSON.stringify(model) : null, Number(pending), analysisRevision, provider);
       db.exec("COMMIT");
       active = false;
     },

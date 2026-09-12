@@ -1,5 +1,6 @@
 import { errorText } from "./inventory.ts";
 import { scan } from "./scan.ts";
+import { selectModel } from "./model.ts";
 
 const [command, root, ...extra] = process.argv.slice(2);
 if (command !== "scan" || !root || extra.length) {
@@ -11,7 +12,9 @@ if (command !== "scan" || !root || extra.length) {
   process.once("SIGINT", stop);
   process.once("SIGTERM", stop);
   try {
-    const report = await scan(root, { model: process.env.FOLDY_MODEL, signal: controller.signal });
+    const { provider, modelTag } = selectModel(process.env.FOLDY_PROVIDER, process.env.FOLDY_MODEL);
+    if (provider === "openai") console.error("Foldy: OpenAI mode selected; inspected text and page images may be sent to api.openai.com.");
+    const report = await scan(root, { provider, model: modelTag, signal: controller.signal });
     console.log(JSON.stringify(report, null, 2));
     process.exitCode = report.status === "complete" ? 0 : report.status === "incomplete" ? 2 : 1;
   } catch (error) {

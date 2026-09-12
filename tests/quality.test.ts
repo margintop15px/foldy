@@ -212,7 +212,11 @@ test("Quality runner retains nonzero process results, abrupt interruption diagno
   assert.match(interrupted.error!, /No parseable/);
   const denied = await runProcess(["tests/quality/scan-process.ts"], { ...process.env, FOLDY_LIVE: "0" });
   assert.equal(denied.exitCode, 1);
-  assert.match(denied.stderr, /explicit local-model access/);
+  assert.match(denied.stderr, /explicit model access/);
+  const missingKey = await runProcess(["tests/quality/run.ts"], { ...process.env, FOLDY_LIVE: "1", FOLDY_PROVIDER: "openai",
+    FOLDY_MODEL: "gpt-4.1-mini", OPENAI_API_KEY: "" });
+  assert.equal(missingKey.exitCode, 1);
+  assert.match(missingKey.stderr, /OpenAI benchmarks require OPENAI_API_KEY/);
 });
 
 test("Quality fixtures keep oracles outside inputs and include additions, replacement, removal, copies and read continuation", async () => {

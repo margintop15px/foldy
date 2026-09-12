@@ -109,7 +109,7 @@ test("A03/CTX-01: a reasoning upgrade migrates old state, keeps history, and rev
   const first = await scan(root, { stateDir, stream: inspect("note.txt", "Previously recorded.") });
   const before = await tree(root);
   const db = new DatabaseSync(databasePath(root, stateDir));
-  db.exec("ALTER TABLE state DROP COLUMN analysis_revision; ALTER TABLE versions DROP COLUMN document; DROP TABLE binaries; DROP TABLE document_cache; UPDATE state SET schema_version = 1");
+  db.exec("ALTER TABLE state DROP COLUMN analysis_revision; ALTER TABLE state DROP COLUMN model_provider; ALTER TABLE versions DROP COLUMN document; DROP TABLE binaries; DROP TABLE document_cache; UPDATE state SET schema_version = 1");
   db.close();
   const failed = await scan(root, { stateDir, stream: scripted(() => "error") });
   assert.equal(failed.rebuildingKnowledge, true);
@@ -118,7 +118,7 @@ test("A03/CTX-01: a reasoning upgrade migrates old state, keeps history, and rev
   assert.deepEqual(failed.findings, [], "Old conclusions stay historical until revalidated, including after a failed upgrade run.");
   assert.equal(query(root, stateDir, "SELECT count(*) AS count FROM findings WHERE current = 0")[0]!.count, 1);
   assert.deepEqual(query(root, stateDir, "SELECT schema_version, analysis_revision FROM state"),
-    [{ schema_version: 3, analysis_revision: ANALYSIS_REVISION }]);
+    [{ schema_version: 4, analysis_revision: ANALYSIS_REVISION }]);
   const next = await scan(root, { stateDir, stream: scripted((_context, index) => [
     [finding("note.txt", "Previously recorded.")], // Prior inspection is not a read in this session.
     [read("note.txt")], [finding("note.txt", "Previously recorded.")], [],
@@ -264,6 +264,88 @@ test("A06/CTX-01: rewritten and elided quotes are rejected; separated exact pass
   assert.deepEqual(report.findings[0]!.evidence.map(ref => { assert.ok(ref.type !== "visual"); return ref.quote; }), ["Opening fact.", "Closing fact.", "Literal marker: ..."]);
   assert.equal((await scan(root, { stateDir, stream: forbidden })).cached, true);
   assert.deepEqual(await tree(root), before);
+});
+
+test("RUN-02: rejected finding writes cannot complete or cache without an accepted result", async t => {
+  for (const existingFinding of [false, true]) {
+    const { root, stateDir } = await fixture(t);
+    await writeFile(join(root, "note.md"), "A **verified** detail.");
+    const first = await scan(root, { stateDir, stream: scripted((_context, n) =>
+      n === 0 ? [read("note.md")] : n === 1 && existingFinding ? [finding("note.md", "A **verified** detail.")] : []) });
+    const rejected = await scan(root, { stateDir, model: "retry-test", stream: scripted((_context, n) => [
+      [read("note.md")], [finding("note.md", "A verified detail.")], [],
+      [read("note.md")], [finding("note.md", "A verified detail.")], [],
+    ][n]) });
+    assert.equal(rejected.files[0]!.inspection, "full");
+    assert.equal(rejected.status, "incomplete");
+    assert.equal(rejected.reasoningPending, true);
+    assert.deepEqual(rejected.findingWrites, { accepted: 0, rejected: 2 });
+    assert.match(rejected.errors.join(" "), /No finding write succeeded/);
+    assert.deepEqual(rejected.findings, first.findings, "Existing knowledge cannot conceal this run's rejected work.");
+    assert.equal(query(root, stateDir, "SELECT pending FROM state")[0]!.pending, 1);
+    const retried = await scan(root, { stateDir, model: "retry-test", stream: inspect("note.md", "A **verified** detail.") });
+    assert.equal(retried.cached, false);
+    assert.equal(retried.reasoningPending, false);
+    assert.equal(retried.status, "complete");
+    assert.equal(retried.findings.length, 1);
+    assert.equal(retried.files[0]!.sourceId, first.files[0]!.sourceId);
+    assert.equal((await scan(root, { stateDir, model: "retry-test", stream: forbidden })).cached, true);
+  }
+});
+
+test("CTX-01: text references preserve exact Markdown and cannot transfer between sources or sessions", async t => {
+  const { root, stateDir } = await fixture(t);
+  const contents = '# Notes\r\nKeep **class_name** and `self.value` unchanged.\r\n[Link](https://example.test/a_b) — “quoted” text.\r\n'.repeat(30);
+  await writeFile(join(root, "a.md"), contents);
+  await writeFile(join(root, "b.md"), contents);
+  const before = await tree(root);
+  let textRef = "";
+  const cite = (path = "a.md", reference = textRef, quote?: string) => call("record_finding", {
+    claim: "The notes request keeping class_name and self.value unchanged.", kind: "observed",
+    evidence: [{ path, textRef: reference, ...(quote ? { quote } : {}) }],
+  });
+  const first = await scan(root, { stateDir, stream: scripted((context, n) => {
+    if (n === 1) {
+      const excerpt = toolResult(context, "read_file");
+      assert.ok(excerpt.text.length > 2_000);
+      assert.equal(excerpt.text, contents);
+      assert.ok(excerpt.textRef);
+      textRef = excerpt.textRef;
+    }
+    return [
+      [read("a.md")],
+      [cite("b.md"), cite("a.md", "invented"), cite("a.md", textRef, "Keep **class_name**")],
+      [cite(), read("b.md")], [],
+      [cite()], // The review is a fresh session, so the reference has expired.
+      [read("a.md")],
+      n === 6 ? [cite("a.md", toolResult(context, "read_file").textRef)] : [], [],
+    ][n];
+  }) });
+  assert.equal(first.status, "complete", JSON.stringify(first.errors));
+  assert.equal(first.toolErrors.length, 4);
+  assert.equal(first.findings.length, 1, "The same original evidence keeps the finding ID across sessions.");
+  const evidence = first.findings[0]!.evidence[0]!;
+  assert.ok(evidence.type !== "visual");
+  assert.equal(evidence.quote, contents);
+  assert.equal(evidence.start, 0);
+  assert.equal(evidence.end, contents.length);
+  assert.equal((await scan(root, { stateDir, stream: forbidden })).cached, true);
+  assert.deepEqual(await tree(root), before);
+
+  await writeFile(join(root, "a.md"), "A changed **source**.");
+  const changed = await scan(root, { stateDir, stream: scripted((context, n) => {
+    if (n === 0) return [cite()];
+    if (n === 1) return [read("a.md")];
+    if (n === 2) return [call("record_finding", { claim: "The source changed.", kind: "observed",
+      evidence: [{ path: "a.md", textRef: toolResult(context, "read_file").textRef }] })];
+    return [];
+  }) });
+  assert.equal(changed.toolErrors.length, 1);
+  assert.match(changed.toolErrors[0]!, /textRef/);
+  assert.equal(changed.status, "complete");
+  assert.equal(changed.findings.length, 1);
+  assert.notEqual(changed.findings[0]!.id, first.findings[0]!.id);
+  assert.equal(changed.files[0]!.sourceId, first.files[0]!.sourceId);
 });
 
 test("A03/A06/RUN-02: failure and controlled cancellation commit valid findings and force a retry", async t => {

@@ -227,8 +227,9 @@ test("A05/CTX-01: PDFs require correct pages, exact text or delivered pixels; se
       assert.equal(page.page, 12); assert.equal(page.pageCount, 12); assert.equal(page.nextPage, null);
       return [visual("a.pdf", visualRef, 11), call("record_finding", { claim: "Missing page.", kind: "observed", evidence: [{ path: "a.pdf", quote: "Calibration owner: Talia." }] }),
         call("record_finding", { claim: "Wrong quote.", kind: "observed", evidence: [{ path: "a.pdf", page: 12, quote: "Reservation complete." }] }),
+        call("record_finding", { claim: "Wrong text-reference page.", kind: "observed", evidence: [{ path: "a.pdf", page: 11, textRef: page.textRef }] }),
         call("record_finding", { claim: "Calibration owner is Talia; the page requests room Elm.", kind: "observed", evidence: [
-          { path: "a.pdf", page: 12, quote: "Calibration owner: Talia." }, { path: "a.pdf", page: 12, visualRef },
+          { path: "a.pdf", page: 12, textRef: page.textRef }, { path: "a.pdf", page: 12, visualRef },
         ] }), call("search_context", { query: "Talia" })];
     }
     if (turn === 2) {
@@ -237,10 +238,14 @@ test("A05/CTX-01: PDFs require correct pages, exact text or delivered pixels; se
     }
     return [];
   }) });
-  assert.equal(report.toolErrors.length, 4);
+  assert.equal(report.toolErrors.length, 5);
   assert.equal(report.findings.length, 1);
   assert.equal(report.files[0]!.inspection, "partial");
   assert.equal(report.reasoningPending, true);
+  const text = report.findings[0]!.evidence[0]!;
+  assert.ok(text.type !== "visual");
+  assert.match(text.quote, /Calibration owner: Talia\./);
+  assert.equal(text.page, 12);
   assert.equal(report.findings[0]!.evidence[1]!.page, 12);
 });
 
@@ -414,7 +419,9 @@ test("CTX-01: actual Pi compaction invalidates text and visual citation eligibil
   await copyFile(asset("a.png"), join(root, "a.png"));
   await writeFile(join(root, "note.txt"), "A current text fact.");
   const originalPrompt = AgentSession.prototype.prompt;
-  let compacted = false, phase = 0, reference = "";
+  let compacted = false, phase = 0, reference = "", textReference = "";
+  const citeText = () => call("record_finding", { claim: "A current text fact.", kind: "observed",
+    evidence: [{ path: "note.txt", textRef: textReference }] });
   t.mock.method(AgentSession.prototype, "prompt", async function (this: AgentSession, ...args: Parameters<typeof originalPrompt>) {
     await originalPrompt.apply(this, args);
     if (!compacted) {
@@ -427,22 +434,29 @@ test("CTX-01: actual Pi compaction invalidates text and visual citation eligibil
       await originalPrompt.call(this, "Check citation eligibility after compaction.");
     }
   });
-  const report = await scan(root, { stateDir, offlineModel: { name: "compaction-test", contextWindow: 32768, capabilities: ["tools", "vision"] }, stream: scripted(context => {
+  const report = await scan(root, { stateDir, offlineModel: { name: "compaction-test", contextWindow: 32768, capabilities: ["tools", "vision"] },
+    onToolEvent: event => {
+      if (event.type !== "tool_execution_end" || event.toolName !== "read_file" || event.isError) return;
+      const result = event.result as { content: { type: string; text?: string }[] };
+      const metadata = JSON.parse(result.content.find(block => block.type === "text")!.text!);
+      if (metadata.path === "note.txt") textReference = metadata.textRef;
+    }, stream: scripted(context => {
     if (!context.tools?.some(tool => tool.name === "read_file")) return []; // Pi's compaction summary.
     switch (phase++) {
       case 0: return [read("note.txt"), read("a.png")];
       case 1: reference = toolResult(context, "read_file").visualRef; return [];
-      case 2: return [visual("a.png", reference), finding("note.txt", "A current text fact.")];
+      case 2: return [visual("a.png", reference), finding("note.txt", "A current text fact."), citeText()];
       case 3: return [read("note.txt"), read("a.png")];
-      case 4: return [visual("a.png", toolResult(context, "read_file").visualRef), finding("note.txt", "A current text fact.")];
+      case 4: return [visual("a.png", toolResult(context, "read_file").visualRef), citeText()];
       default: return [];
     }
   }) });
   assert.deepEqual(report.errors, []);
   assert.ok(compacted);
-  assert.equal(report.toolErrors.length, 2);
+  assert.equal(report.toolErrors.length, 3);
   assert.ok(report.toolErrors.some(error => error.includes("visualRef")));
   assert.ok(report.toolErrors.some(error => error.includes("No excerpt read")));
+  assert.ok(report.toolErrors.some(error => error.includes("textRef")));
   assert.equal(report.findings.length, 2);
   assert.equal(report.status, "complete", JSON.stringify(report.errors));
 });

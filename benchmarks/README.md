@@ -15,6 +15,16 @@ npm run bench -- --suite all --out benchmarks/runs/my-change --trials 3
 npm run bench:score -- benchmarks/runs/my-change --strict
 ```
 
+For a temporary OpenAI check, set `OPENAI_API_KEY` in your shell, then run one synthetic document case:
+
+```sh
+FOLDY_PROVIDER=openai npm run bench -- --suite documents --case D03 --trials 1 --out benchmarks/runs/openai-d03-01
+```
+
+`FOLDY_MODEL` selects an OpenAI model from Pi's bundled catalog; the default is `gpt-4.1-mini`. OpenAI receives the inspected fixture text, exact image/page previews and retrieved context. API use is billable. The runner checks for a key before starting a new collection. `FOLDY_PROVIDER=ollama` returns to local testing; neither provider falls back to the other. No extraction, tools, prompts or grading rules change with the provider.
+
+Manifests and scorecards identify the provider and model. Every trial still uses fresh state, and the final cache scan denies all network requests. Keep OpenAI and Ollama collections in separate output directories, compare the actual configuration and latency, and retain local regression runs: OpenAI success does not establish Qwen's semantic quality. Historical collections without a provider field are Ollama runs.
+
 `--suite text` remains the default six-case suite. `--suite documents` selects D01–D04; `--suite all` is 30 trials / 90 scans. The output directory must be new. Set `FOLDY_MODEL` to compare another installed local model. `--case Q02 --trials 1` is available for diagnosis; a subset is not the full benchmark. Run serially without other model workloads for useful latency comparisons. First-load state is recorded in the manifest; each report includes its actual model digest/context/runtime.
 
 Each trial has a fresh temporary root and SQLite state outside it. Two batches run in fresh processes using the same `scan` API as the CLI. The third process scans unchanged inputs with network access denied: it must return the same findings with zero model/tool calls. Q03 also replaces a source and removes another. Q06 needs read continuation and contains an intentionally invalid PNG. Before phase 03 it was unsupported; now it must be reported corrupt with readable reasoning finished. This versioned status correction does not turn it into a vision test. Historical reports and scores stay unchanged.

@@ -13,7 +13,7 @@ The first useful result is shared understanding: a receipt, statement entry, and
 KISS is our philosophy, mantra, and default answer to implementation choices.
 
 1. Build the smallest thing that satisfies the current chunk and its acceptance tests.
-2. Use one foreground Foldy process, one folder, one local model, and one SQLite database per watched root. The user can keep editing the folder in other applications.
+2. Use one foreground Foldy process, one folder, one active model, and one SQLite database per watched root. Ollama is the default; explicit OpenAI scans are available for development testing. The user can keep editing the folder in other applications.
 3. Reuse Pi and standard-library capabilities before writing replacements. Add a dependency only for a concrete requirement in the current chunk.
 4. Prefer plain functions and simple records. Introduce an abstraction when existing code demonstrates the need for it.
 5. Keep source-backed findings in SQLite. Add retrieval infrastructure only after a reproducible limitation appears.

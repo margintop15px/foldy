@@ -5,14 +5,18 @@ import { arch, cpus, platform, release, tmpdir, totalmem } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { DEFAULT_MODEL, localFetch, MAX_RESPONSE_TOKENS, SYSTEM_PROMPT, REVIEW_PROMPT } from "../../src/model.ts";
+import { localFetch, MAX_RESPONSE_TOKENS, prepareOpenAIModel, selectModel, SYSTEM_PROMPT, REVIEW_PROMPT } from "../../src/model.ts";
 import { tree } from "../helpers.ts";
 import { documentCases } from "./documents.ts";
 import { cases } from "./cases.ts";
 import { checkScan, hash, runProcess, type Results, type ScanResult } from "./harness.ts";
 import { writeScorecard } from "./score.ts";
 
-assert.equal(process.env.FOLDY_LIVE, "1", "Use npm run bench to enable local model access.");
+assert.equal(process.env.FOLDY_LIVE, "1", "Use npm run bench to enable model access.");
+const { provider, modelTag } = selectModel(process.env.FOLDY_PROVIDER, process.env.FOLDY_MODEL);
+if (provider === "openai" && !process.env.OPENAI_API_KEY?.trim()) throw new Error("OpenAI benchmarks require OPENAI_API_KEY.");
+const openAIModel = provider === "openai" ? prepareOpenAIModel(modelTag) : undefined;
+if (provider === "openai") console.log("OpenAI benchmark: synthetic fixture content will be sent to api.openai.com.");
 const args = process.argv.slice(2);
 let trials = 3, suite = "text", selectedId = "", out = "";
 for (let i = 0; i < args.length; i += 2) {
@@ -43,7 +47,7 @@ await writeFile(join(out, "source-snapshot.json"), JSON.stringify(snapshot, null
 const patch = await git("diff", "HEAD", "--", "src", "package.json", "package-lock.json", "tests");
 await writeFile(join(out, "working-tree.patch"), patch);
 let modelBefore: unknown;
-try { modelBefore = await (await localFetch("http://127.0.0.1:11434/api/ps", { signal: AbortSignal.timeout(5_000) })).json(); }
+try { modelBefore = openAIModel ?? await (await localFetch("http://127.0.0.1:11434/api/ps", { signal: AbortSignal.timeout(5_000) })).json(); }
 catch (error) { modelBefore = { error: String(error) }; }
 const assets = new Map(selected.flatMap(item => item.stages.flatMap(stage => Object.values(stage.files)))
   .filter(content => content !== null && typeof content !== "string").map(content => [content.asset, content]));
@@ -57,9 +61,9 @@ const results: Results = {
   version: 1, trials, cases: selected, scans: [], finished: false,
   manifest: { startedAt: new Date().toISOString(), command: process.argv.slice(1), commit: await git("rev-parse", "HEAD"),
     gitStatus: await git("status", "--short"), patchHash: hash(patch), codeFiles: fingerprints, casesHash: hash(selected),
-    promptHash: hash(SYSTEM_PROMPT), reviewPromptHash: hash(REVIEW_PROMPT), suite, oracleRevision: 3, modelTag: process.env.FOLDY_MODEL ?? DEFAULT_MODEL, modelBefore,
+    promptHash: hash(SYSTEM_PROMPT), reviewPromptHash: hash(REVIEW_PROMPT), suite, oracleRevision: 3, provider, modelTag, modelBefore,
     node: process.version, sqlite: process.versions.sqlite, hardware: { platform: platform(), release: release(), arch: arch(), cpu: cpus()[0]?.model, memoryBytes: totalmem() },
-    settings: { temperature: 0, maxOutputTokens: MAX_RESPONSE_TOKENS, responseTokenLimit: "min(maxOutputTokens, floor(contextWindow / 2), Pi remaining-context allowance)", maxTokensField: "max_tokens", reasoningEffort: "low when supported; per-scan model records the selected mode", retries: 0, textLimits: { maxToolCalls: 20, maxRunMs: 300_000 }, documentLimits: { maxToolCalls: 80, maxRunMs: 900_000 },
+    settings: { temperature: openAIModel?.reasoningEffort === "low" ? null : 0, maxOutputTokens: MAX_RESPONSE_TOKENS, responseTokenLimit: "min(maxOutputTokens, floor(contextWindow / 2), Pi remaining-context allowance)", maxTokensField: provider === "openai" ? "max_output_tokens" : "max_tokens", reasoningEffort: "low when supported; per-scan model records the selected mode", retries: 0, textLimits: { maxToolCalls: 20, maxRunMs: 300_000 }, documentLimits: { maxToolCalls: 80, maxRunMs: 900_000 },
       compaction: { reserveTokens: "min(maxOutputTokens, floor(contextWindow / 2))", keepRecentTokens: 2_048 } },
     protocol: "Fresh process per scan; fresh root/state per trial; two stages then unchanged cache probe with network denied. Serial, no retries. Tool traces exclude model reasoning. Per-scan model metadata records actual runtime/digest/context.",
   },

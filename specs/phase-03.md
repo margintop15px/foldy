@@ -4,7 +4,7 @@ Status: implementation in progress. A passing runtime check is not a semantic qu
 
 Scope update (2026-09-12): the user asked to finish PDF parsing promptly and stop spending time on making every quality check green. Deliver the document reader with focused validation; defer further text-prompt tuning and the full 30-trial quality gate. The gate below remains the broader phase target, not a claimed passing result or a blocker for this reader delivery.
 
-This records the approved phase. KISS: one local model, one SQLite database, three model tools, plain functions, sequential extraction. Watching, spreadsheets, generated user files, corrections and external actions remain in later slices.
+This records the approved phase. KISS: one active model, one SQLite database, three model tools, plain functions, sequential extraction. Ollama remains the default. A subsequent user-authorized OpenAI provider switch supports temporary testing with the same pipeline; remote results remain separate from the local acceptance gate. Watching, spreadsheets, generated user files, corrections and external actions remain in later slices.
 
 ## Sequential slices
 
@@ -22,13 +22,14 @@ This records the approved phase. KISS: one local model, one SQLite database, thr
 - Input limits: 20 MiB / 64 million pixels for images; 50 MiB for PDFs. Preview longest edge at most 2,000 pixels and base64 payload at most 4.5 MiB. Report reductions. PDF page text at most 64 KiB; truncation is explicitly partial.
 - `read_file(path, offset?, page?)` preserves text reads of 4,000 UTF-16 characters. Image reads return pixels and metadata. PDF reads return one page's pixels and bounded text, one-based `page`, `pageCount`, `nextPage`, and `nextOffset`.
 - PDF text and visual coverage are independent. Rendering or extracting alone is not model inspection. Never claim omitted, corrupt, encrypted or unread content inspected.
-- Evidence is an exact current-session quotation (plus page for PDF text) or a session-local visual reference. Visual references become eligible only after delivery to a successful model turn. Successful Pi compaction clears current citation eligibility; rereading restores it.
+- Evidence is an exact current-session quotation (plus page for PDF text) or a session-local visual reference. `read_file` also issues a `textRef` for each nonblank text excerpt; citing it attaches that original excerpt and location without model transcription. Text references are bound to the source, version, page and session. Visual references become eligible only after delivery to a successful model turn. Successful Pi compaction clears current citation eligibility; rereading restores it.
 - Persist visual references as original source ID/version, image/page, preview fingerprint and dimensions. Model-interpreted image text is visual evidence, not verified extraction.
 - `record_finding(..., replacesFindingId?)` validates a complete replacement before retiring a current model finding. Retain its history. A separate contradictory finding does not fix a current mistake.
 - Enable Pi image transport only for models advertising vision. Text-only models continue eligible text work and report unavailable visual inspection.
 - Migrate databases transactionally, preserving source/finding identities and history. Snapshot binary bytes one file at a time into SQLite; share extraction caches by original fingerprint, extractor revision and page while keeping inspection source-specific.
 - Fingerprint each scan, recheck source versions after extraction, invalidate stale conclusions. Search current indexed PDF text and visual findings with literal text search; disclose incomplete coverage.
 - Unchanged completed scans do zero model calls and zero extraction/rendering. Cancellation preserves valid progress and pending status. Stable corrupt/encrypted inputs do not cause inference retries by themselves.
+- If this run rejected finding writes and accepted none, report incomplete reasoning and preserve pending work. Earlier findings and complete inspection coverage cannot turn those rejected attempts into successful completion. Accepted/rejected write counts are diagnostics, not a semantic quality grade.
 - Use in-memory PDF bytes and package-local resources. Never follow document URLs, run embedded scripts or extract attachments. The helper is fault isolation, not an OS security sandbox.
 
 ## Quality protocol

@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { type Inspection } from "./harness.ts";
 import { scan } from "../../src/scan.ts";
 
-if (process.env.FOLDY_LIVE !== "1") throw new Error("Use npm run bench for explicit local-model access.");
+if (process.env.FOLDY_LIVE !== "1") throw new Error("Use npm run bench for explicit model access.");
 const [root, traceFile, cache] = process.argv.slice(2);
 if (!root || !traceFile) throw new Error("Benchmark driver needs a root and trace file.");
 const controller = new AbortController();
@@ -20,7 +20,7 @@ globalThis.fetch = (...args) => {
 };
 const inspections: Inspection[] = [];
 try {
-  const report = await scan(root, { model: process.env.FOLDY_MODEL, signal: controller.signal,
+  const report = await scan(root, { provider: process.env.FOLDY_PROVIDER, model: process.env.FOLDY_MODEL, signal: controller.signal,
     onToolEvent: event => {
       let logged: unknown = event;
       if (event.type === "tool_execution_end" && event.toolName === "read_file" && !event.isError) {

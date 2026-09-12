@@ -3,7 +3,7 @@ import { Type } from "typebox";
 import { createHash, randomUUID } from "node:crypto";
 import { realpath, stat } from "node:fs/promises";
 import { errorText, inspectionCoverage, inventoryFolder, READ_CHARACTERS, readSnapshot, inputLimit, rangesCover, type Source } from "./inventory.ts";
-import { ANALYSIS_REVISION, createScanSession, DEFAULT_MODEL, prepareLocalModel, REVIEW_PROMPT, SYSTEM_PROMPT, type ModelInfo, type ModelStream } from "./model.ts";
+import { ANALYSIS_REVISION, createScanSession, prepareLocalModel, prepareOpenAIModel, selectModel, REVIEW_PROMPT, SYSTEM_PROMPT, type ModelInfo, type ModelResponse, type ModelStream } from "./model.ts";
 import { EXTRACTOR_REVISION, MAX_EXTRACTION_MS, extractDocument, type DocumentPage, type PreviewInfo } from "./documents.ts";
 import { openStore, type Evidence } from "./store.ts";
 
@@ -15,6 +15,7 @@ export const MAX_DOCUMENT_RUN_MS = 15 * 60 * 1_000;
 export const MAX_DOCUMENT_TOOL_CALLS = 80;
 
 export interface ScanOptions {
+  provider?: string;
   model?: string;
   /** State base directory; each canonical root gets its own hash-named subdirectory. */
   stateDir?: string;
@@ -47,6 +48,7 @@ function boundedRows(rows: unknown[], maxCharacters: number) {
 }
 
 export async function scan(root: string, options: ScanOptions = {}) {
+  const { provider, modelTag } = selectModel(options.provider, options.model);
   const started = Date.now();
   const controller = new AbortController();
   let limits = { maxRunMs: MAX_DOCUMENT_RUN_MS, maxToolCalls: MAX_DOCUMENT_TOOL_CALLS };
@@ -73,14 +75,16 @@ export async function scan(root: string, options: ScanOptions = {}) {
     if (Date.now() - started >= limits.maxRunMs) expire();
     else timeout = setTimeout(expire, limits.maxRunMs - (Date.now() - started));
     const changes = store.reconcile(inventory);
-    const modelTag = options.model ?? DEFAULT_MODEL;
+    const previousModel: ModelInfo | undefined = store.previous.model_info ? JSON.parse(store.previous.model_info) : undefined;
     const rebuildingKnowledge = store.previous.analysis_revision !== ANALYSIS_REVISION;
     const cached = !rebuildingKnowledge && changes.length === 0 && !store.previous.pending && store.previous.model_tag === modelTag &&
+      store.previous.model_provider === provider &&
       inventory.enumerationComplete && !signal.aborted;
     const errors = [...inventory.errors];
     const toolErrors: string[] = [];
     const sources = new Map(inventory.sources.map(source => [source.path, source]));
     const sessionReads = new Map<string, Source["inspected"]>();
+    const textRefs = new Map<string, { path: string; page?: number; version: string; start: number; end: number }>();
     const readKey = (path: string, page?: number) => `${path}\0${page ?? 0}`;
     const visuals = new Map<string, { source: Source; page: number; preview: PreviewInfo; eligible: boolean }>();
     let delivered = new Set<string>();
@@ -101,15 +105,20 @@ export async function scan(root: string, options: ScanOptions = {}) {
       const current = sessionReads.get(readKey(path, page)) ?? [];
       markRead(ranges, offset, end); markRead(current, offset, end);
       sessionReads.set(readKey(path, page), current);
-      return { text: text.slice(offset, end), start: offset, end, totalCharacters: text.length, nextOffset: end < text.length ? end : null };
+      const excerpt = text.slice(offset, end);
+      const textRef = excerpt.trim() ? randomUUID() : undefined;
+      if (textRef) textRefs.set(textRef, { path, page, version: sources.get(path)!.version!, start: offset, end });
+      return { text: excerpt, textRef, start: offset, end, totalCharacters: text.length, nextOffset: end < text.length ? end : null };
     }
     let toolCalls = 0;
     let executedToolCalls = 0;
     let modelCalls = 0;
+    const modelResponses: (ModelResponse & { modelCall: number })[] = [];
+    const findingWrites = { accepted: 0, rejected: 0 };
     // Agent turns only; Pi's separate compaction and Ollama preflight are excluded.
     const agentUsage = { inputTokens: 0, outputTokens: 0, maxResponseTokens: 0, thinkingResponses: 0 };
     let budgetReached = false;
-    let model: ModelInfo | undefined = cached && store.previous.model_info ? JSON.parse(store.previous.model_info) : undefined;
+    let model = cached ? previousModel : undefined;
     if (model) vision = model.capabilities?.includes("vision") ?? false;
     let failed = false;
     let storageError: unknown;
@@ -212,7 +221,7 @@ export async function scan(root: string, options: ScanOptions = {}) {
     const tools = [
       defineTool({
         name: "read_file", label: "Read a source",
-        description: "Read before citing, even when previousInspection is full. Text reads use nextOffset. PNG/JPEG reads return pixels with a visualRef. PDFs return page pixels plus extracted text; use one-based page, nextPage and nextOffset. Model-interpreted image text needs visual evidence, not fabricated quotes.",
+        description: "Read before citing, even when previousInspection is full. Cite textRef to save this exact text excerpt without retyping it; use nextOffset to continue. PNG/JPEG reads return pixels with a visualRef. PDFs return page pixels plus extracted text; use one-based page, nextPage and nextOffset. Model-interpreted image text needs visual evidence, not fabricated quotes.",
         parameters: Type.Object({ path: Type.String({ description: "Exact readable inventory path." }),
           offset: Type.Optional(Type.Integer({ minimum: 0 })), page: Type.Optional(Type.Integer({ minimum: 1 })) }),
         execute: async (_id, { path, offset = 0, page }) => {
@@ -247,7 +256,7 @@ export async function scan(root: string, options: ScanOptions = {}) {
       }),
       defineTool({
         name: "record_finding", label: "Record a finding",
-        description: "Save useful new information. Every part of the claim needs exact supporting text read in THIS session or a visualRef whose pixels were delivered in this session. A cross-file connection must cite all involved sources in this one finding and explain what links them and what is new. Avoid repeating saved facts. Inferences require an uncertainty explanation.",
+        description: "Save useful new information. Cite textRef from read_file to attach its exact excerpt without copying Markdown or code. Alternatively supply an exact quote, or a visualRef whose pixels were delivered in this session. Every part of the claim needs supporting evidence. A cross-file connection must cite all involved sources in this one finding and explain what links them and what is new. Avoid repeating saved facts. Inferences require an uncertainty explanation.",
         parameters: Type.Object({
           claim: Type.String({ minLength: 1, maxLength: 2_000 }),
           kind: Type.Enum(["observed", "inferred"], { description: 'Use "observed" for direct evidence or "inferred" for a tentative connection.' }),
@@ -256,7 +265,8 @@ export async function scan(root: string, options: ScanOptions = {}) {
           evidence: Type.Array(Type.Object({
             path: Type.String({ description: "Exact source path already read with read_file in this session." }),
             page: Type.Optional(Type.Integer({ minimum: 1, description: "Required for PDF citations; use the one-based page from read_file." })),
-            visualRef: Type.Optional(Type.String({ description: "Exact current-session visualRef from read_file, after seeing its pixels. Supply this OR quote." })),
+            textRef: Type.Optional(Type.String({ description: "Exact current-session textRef from read_file. The application saves that original excerpt as the quotation. Supply exactly one of textRef, quote or visualRef." })),
+            visualRef: Type.Optional(Type.String({ description: "Exact current-session visualRef from read_file, after seeing its pixels. Supply exactly one of textRef, quote or visualRef." })),
             quote: Type.Optional(Type.String({ minLength: 1, maxLength: 2_000,
               description: "Exact contiguous text from read_file, never a saved summary or shortened quotation. For separated passages, use multiple evidence entries with the same path." })),
           }),
@@ -273,9 +283,11 @@ export async function scan(root: string, options: ScanOptions = {}) {
             const source = sourceFor(path);
             if (source.format !== "text") await verify(source);
           }
-          const evidence = args.evidence.map(({ path, quote, visualRef, page }): Evidence => {
+          const evidence = args.evidence.map(({ path, quote, textRef, visualRef, page }): Evidence => {
             const source = sourceFor(path);
-            if (Boolean(quote) === Boolean(visualRef)) throw new Error("Supply exactly one quote or visualRef per evidence entry.");
+            if ([quote, textRef, visualRef].filter(value => value !== undefined).length !== 1) {
+              throw new Error("Supply exactly one textRef, quote or visualRef per evidence entry.");
+            }
             if (source.format === "pdf" && page === undefined) throw new Error("PDF evidence needs a one-based page number.");
             if (source.format === "text" && page !== undefined) throw new Error("Text evidence cannot specify a PDF page.");
             if (visualRef) {
@@ -286,23 +298,28 @@ export async function scan(root: string, options: ScanOptions = {}) {
               return { type: "visual", sourceId: source.sourceId, path, version: source.version,
                 ...(source.format === "pdf" ? { page: reference.page } : {}), preview: reference.preview };
             }
-            if (!quote!.trim()) throw new Error("Evidence cannot be whitespace alone.");
             if (source.format === "image") throw new Error("Image observations require a visualRef; their text is not verified extracted text.");
+            const reference = textRef === undefined ? undefined : textRefs.get(textRef);
+            if (textRef !== undefined && (!reference || reference.path !== path || reference.page !== page || reference.version !== source.version)) {
+              throw new Error("Unknown, stale or wrong-source/page textRef. Reread the source in this session and cite the returned textRef.");
+            }
             const text = source.format === "pdf" ? stored(() => store!.cachedPage(source.version, page!, "pdf")?.text)
               : stored(() => store!.readVersion(source.sourceId, source.version).text);
             const ranges = sessionReads.get(readKey(path, page));
             if (text === undefined || !ranges?.length) {
               throw new Error(`No excerpt read in this session from ${path}. Call read_file first, even if previousInspection is full. Saved summaries are not quotations.`);
             }
+            if (reference) quote = text.slice(reference.start, reference.end);
+            if (!quote?.trim()) throw new Error("Evidence cannot be whitespace alone.");
             for (const range of ranges) {
-              const start = text.indexOf(quote!, range.start), end = start + quote!.length;
+              const start = reference ? reference.start : text.indexOf(quote, range.start), end = start + quote.length;
               if (start >= range.start && end <= range.end) return {
                 sourceId: source.sourceId, path, version: source.version, quote: quote!, start, end,
                 startLine: text.slice(0, start).split("\n").length, endLine: text.slice(0, end - 1).split("\n").length,
                 ...(page === undefined ? {} : { page }),
               };
             }
-            throw new Error(`Quotation does not exactly match an excerpt read in this session from ${path}. Copy contiguous text from read_file, including punctuation and line breaks. Use separate evidence entries for separated passages; do not insert ellipses.`);
+            throw new Error(`Quotation does not exactly match an excerpt read in this session from ${path}. Cite that read_file result's textRef to use the original excerpt without retyping it, or copy contiguous text exactly, including punctuation and line breaks. Use separate evidence entries for separated passages; do not insert ellipses.`);
           });
           return result(stored(() => store!.recordFinding({ claim: args.claim, kind: args.kind,
             uncertainty: args.uncertainty, evidence }, args.replacesFindingId)));
@@ -328,8 +345,9 @@ export async function scan(root: string, options: ScanOptions = {}) {
     try {
       signal.throwIfAborted();
       if (!cached && inventory.sources.some(source => source.status === "ready" && source.format)) {
-        model = options.stream ? options.offlineModel ?? { name: "offline-test", contextWindow: 8_192, capabilities: ["tools", "vision"] }
-          : await prepareLocalModel(modelTag, signal);
+        model = options.stream ? { ...(options.offlineModel ?? (provider === "openai" ? prepareOpenAIModel(modelTag)
+          : { name: "offline-test", contextWindow: 8_192, capabilities: ["tools", "vision"] })), provider }
+          : provider === "openai" ? prepareOpenAIModel(modelTag) : await prepareLocalModel(modelTag, signal);
         vision = model.capabilities?.includes("vision") ?? false;
         for (const source of inventory.sources) if (source.document) source.document.visualUnavailable = !vision;
         async function startSession(review = false) {
@@ -347,10 +365,10 @@ export async function scan(root: string, options: ScanOptions = {}) {
               if (reference && message.content.some(block => block.type === "image" &&
                 createHash("sha256").update(Buffer.from(block.data, "base64")).digest("hex") === reference.preview.hash)) delivered.add(id!);
             }
-          }, review ? REVIEW_PROMPT : SYSTEM_PROMPT);
+          }, review ? REVIEW_PROMPT : SYSTEM_PROMPT, response => modelResponses.push({ modelCall: modelCalls, ...response }));
           session.subscribe(event => {
             if (event.type === "compaction_end" && !event.aborted && event.result) {
-              sessionReads.clear(); visuals.clear(); delivered.clear();
+              sessionReads.clear(); textRefs.clear(); visuals.clear(); delivered.clear();
             }
           });
           abortSession = () => { void session!.abort(); };
@@ -361,6 +379,9 @@ export async function scan(root: string, options: ScanOptions = {}) {
           const allowed = new Set<object>();
           session.agent.subscribe(event => {
             if (event.type === "tool_execution_start" || event.type === "tool_execution_end") options.onToolEvent?.(event);
+            if (event.type === "tool_execution_end" && event.toolName === "record_finding") {
+              findingWrites[event.isError ? "rejected" : "accepted"]++;
+            }
             if (event.type === "message_end" && event.message.role === "assistant") {
               if (["stop", "toolUse"].includes(event.message.stopReason)) for (const id of delivered) {
                 const reference = visuals.get(id);
@@ -421,7 +442,7 @@ Untrusted folder overview:\n${JSON.stringify(overview)}`);
           signal.removeEventListener("abort", abortSession!);
           await session!.abort();
           session!.dispose();
-          sessionReads.clear(); visuals.clear(); delivered.clear();
+          sessionReads.clear(); textRefs.clear(); visuals.clear(); delivered.clear();
           await startSession(true);
           const remaining = inventory.sources.filter(source => needsInspection(source))
             .map(source => ({ path: source.path, ...nextRead(source), document: documentOverview(source) }));
@@ -435,6 +456,7 @@ Then finish remaining readable excerpts and record useful missing information, i
 For each meaningful cross-file connection, save the concrete new contribution together with the earlier context in ONE jointly cited finding.
 Do not stop at merely saying the files refer to the same thing; explain the supported change, confirmation, or fit using the relevant passages.
 Keep unknowns unknown, add no speculative causes, and avoid repeating current supported facts.
+Finding writes so far: ${JSON.stringify(findingWrites)}. If attempts were rejected without any accepted result, reread their sources and save supported findings using fresh textRef or visualRef values.
 Untrusted source inventory: ${JSON.stringify(boundedRows(listing, 4_000))}
 Untrusted remaining reads: ${JSON.stringify(boundedRows(remaining, 2_000))}
 Untrusted saved findings: ${JSON.stringify(boundedRows(store.findings().map(({ id, claim, kind, uncertainty, evidence }) => ({ id, claim, kind, uncertainty, evidence })), 8_000))}`);
@@ -445,6 +467,8 @@ Untrusted saved findings: ${JSON.stringify(boundedRows(store.findings().map(({ i
       errors.push(errorText(error));
     }
     if (storageError) throw storageError;
+    const rejectedAllFindings = findingWrites.rejected > 0 && findingWrites.accepted === 0;
+    if (rejectedAllFindings) errors.push(`No finding write succeeded; ${findingWrites.rejected} attempts were rejected. Work remains pending; scan again to retry.`);
     if (signal.aborted) errors.push(errorText(signal.reason));
     if (budgetReached) errors.push(`The ${limits.maxToolCalls}-tool-call budget was reached. Work is incomplete; scan again to retry.`);
     if (!cached && !signal.aborted) for (const source of inventory.sources) {
@@ -459,16 +483,16 @@ Untrusted saved findings: ${JSON.stringify(boundedRows(store.findings().map(({ i
     const incomplete = budgetReached || signal.aborted || errors.length > 0 ||
       files.some(source => source.kind !== "symlink" && source.kind !== "directory" && source.inspection !== "full") ||
       files.some(source => source.status === "error");
-    const reasoningPending = failed || budgetReached || signal.aborted || !inventory.enumerationComplete ||
+    const reasoningPending = failed || rejectedAllFindings || budgetReached || signal.aborted || !inventory.enumerationComplete ||
       inventory.sources.some(source => needsInspection(source));
     const findings = store.findings();
-    store.save(inventory.sources, modelTag, model, reasoningPending);
+    store.save(inventory.sources, modelTag, model, reasoningPending, provider);
     return {
       root: inventory.root, observedAt: inventory.observedAt,
       status: failed && !signal.aborted ? "failed" : incomplete ? "incomplete" : "complete",
       cached, reasoningPending, rebuildingKnowledge, analysisRevision: ANALYSIS_REVISION,
-      model, limits, processing, durationMs: Date.now() - started, modelCalls, toolCalls, executedToolCalls, agentUsage,
-      files, findings, errors, toolErrors,
+      provider, model, limits, processing, durationMs: Date.now() - started, modelCalls, modelResponses, toolCalls, executedToolCalls, agentUsage,
+      files, findings, findingWrites, errors, toolErrors,
     };
   } finally {
     clearTimeout(timeout);
