@@ -1,6 +1,6 @@
 # Foldy
 
-A local folder-reading agent built with Pi and Ollama. Foldy reads text, PNG/JPEG images and PDF pages, remembers source-backed findings across scans, and connects new inputs to earlier evidence. Quotations and visual references carry stable source IDs. The scanned folder stays unchanged.
+A local folder-reading agent built with Pi and Ollama. Foldy reads text, PNG/JPEG images and PDF pages, remembers source-backed findings across scans, and connects new inputs to earlier evidence. Quotations and visual references carry stable source IDs. Source documents stay unchanged; the CLI writes its report to `.foldy.json` in the scanned folder.
 
 Document reading is implemented. The broader phase 03 semantic quality gate remains open; see the [validation record](specs/implementation.md#03--understand-images-and-pdfs).
 
@@ -15,6 +15,10 @@ npm run foldy -- scan ./tests/fixtures/text
 ```
 
 Replace the fixture path with the folder to inspect. The result is JSON containing the inventory, inspection coverage, current findings, and errors. Exit codes: `0` for complete inspection, `2` for incomplete inspection, and `1` for a failed run.
+
+The CLI saves exactly the JSON printed on stdout to `<canonical-root>/.foldy.json`, including cached, incomplete and failed reports. This is a complete view of current accumulated findings, not just the latest changes. SQLite continues to provide incremental analysis and caching; writing the JSON does not trigger another analysis. The report and reserved `.foldy.json.<uuid>.tmp` files are excluded from the root inventory. The library `scan()` itself does not write this export.
+
+Reports are written through an exclusive temporary file and atomic rename. Exceptions before a report is returned leave the previous export intact; a save failure exits with code `1`. Symlink and directory destinations are rejected. Check `status`, `reasoningPending` and `observedAt` when reading the export later. Only current findings are exported; history remains in SQLite.
 
 Run the same command again: unchanged, completed work returns `cached: true` with zero model and tool calls, without contacting the model provider. New or changed inputs, removed or unverifiable evidence, a different provider, model tag or analysis revision, or unfinished reasoning trigger another run. `reasoningPending` distinguishes unfinished reasoning from unsupported files, which stay visible without repeatedly triggering inference. Stable corrupt or encrypted documents stay visible without repeated inference. A root with no eligible readable inputs makes no model requests.
 
