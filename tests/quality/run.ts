@@ -5,7 +5,7 @@ import { arch, cpus, platform, release, tmpdir, totalmem } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { localFetch, MAX_RESPONSE_TOKENS, prepareOpenAIModel, selectModel, SYSTEM_PROMPT, REVIEW_PROMPT } from "../../src/model.ts";
+import { localFetch, COMPACTION_RESERVE_TOKENS, prepareOpenAIModel, selectModel, SYSTEM_PROMPT, REVIEW_PROMPT } from "../../src/model.ts";
 import { tree } from "../helpers.ts";
 import { documentCases } from "./documents.ts";
 import { cases } from "./cases.ts";
@@ -63,8 +63,8 @@ const results: Results = {
     gitStatus: await git("status", "--short"), patchHash: hash(patch), codeFiles: fingerprints, casesHash: hash(selected),
     promptHash: hash(SYSTEM_PROMPT), reviewPromptHash: hash(REVIEW_PROMPT), suite, oracleRevision: 3, provider, modelTag, modelBefore,
     node: process.version, sqlite: process.versions.sqlite, hardware: { platform: platform(), release: release(), arch: arch(), cpu: cpus()[0]?.model, memoryBytes: totalmem() },
-    settings: { temperature: openAIModel?.reasoningEffort === "low" ? null : 0, maxOutputTokens: MAX_RESPONSE_TOKENS, responseTokenLimit: "min(maxOutputTokens, floor(contextWindow / 2), Pi remaining-context allowance)", maxTokensField: provider === "openai" ? "max_output_tokens" : "max_tokens", reasoningEffort: "low when supported; per-scan model records the selected mode", retries: 0, textLimits: { maxToolCalls: 20, maxRunMs: 300_000 }, documentLimits: { maxToolCalls: 80, maxRunMs: 900_000 },
-      compaction: { reserveTokens: "min(maxOutputTokens, floor(contextWindow / 2))", keepRecentTokens: 2_048 } },
+    settings: { temperature: openAIModel?.reasoningEffort === "low" ? null : 0, maxOutputTokens: null, responseTokenLimit: "provider default; application cap temporarily disabled", maxTokensField: null, reasoningEffort: "low when supported; per-scan model records the selected mode", retries: 0, textLimits: { maxToolCalls: null, maxRunMs: 300_000 }, documentLimits: { maxToolCalls: null, maxRunMs: 900_000 },
+      compaction: { reserveTokens: `min(${COMPACTION_RESERVE_TOKENS}, floor(contextWindow / 2))`, keepRecentTokens: 2_048 } },
     protocol: "Fresh process per scan; fresh root/state per trial; two stages then unchanged cache probe with network denied. Serial, no retries. Tool traces exclude model reasoning. Per-scan model metadata records actual runtime/digest/context.",
   },
 };

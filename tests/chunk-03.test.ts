@@ -192,7 +192,7 @@ test("A03/A04/A05: image evidence survives restart, identical copies share proce
     if (turn === 1) return [visual("a.png", toolResult(context, "read_file").visualRef)];
     return [];
   }) });
-  assert.equal(first.limits.maxToolCalls, 80);
+  assert.equal(first.limits.maxToolCalls, null);
   assert.equal(first.limits.maxRunMs, 900_000);
   assert.equal(first.processing.jobs, 1);
   assert.equal(first.reasoningPending, true);
@@ -364,7 +364,8 @@ test("A05: the actual Ollama request carries the rendered pixels only when visio
         const images = body.messages.flatMap((message: { content: unknown }) => Array.isArray(message.content)
           ? message.content.filter((block: { type: string }) => block.type === "image_url").map((block: { image_url: { url: string } }) => block.image_url.url) : []);
         assert.deepEqual(images, vision ? [expectedImage] : []);
-        assert.equal(body.max_tokens, 8192);
+        assert.equal(body.max_tokens, undefined);
+        assert.equal(body.max_completion_tokens, undefined);
       }
       const action = index === 0 ? { name: "read_file", arguments: { path: "a.png" } }
         : index === 1 && vision ? { name: "record_finding", arguments: { claim: "Three red circles are above two blue squares.", kind: "observed", evidence: [{ path: "a.png", visualRef }] } } : undefined;
@@ -387,7 +388,7 @@ test("A05: the actual Ollama request carries the rendered pixels only when visio
   }
 });
 
-test("CTX-01/RUN-02: same-batch image citations and a final-budget read cannot claim delivered inspection", async t => {
+test("CTX-01/RUN-02: same-batch citations and large image read batches still require successful model delivery", async t => {
   const { root, stateDir } = await fixture(t);
   await copyFile(asset("a.png"), join(root, "a.png"));
   const premature = visual("a.png", "not-delivered-yet");
@@ -405,12 +406,13 @@ test("CTX-01/RUN-02: same-batch image citations and a final-budget read cannot c
   assert.equal(report.findings.length, 1);
   const fresh = await fixture(t);
   await copyFile(asset("a.png"), join(fresh.root, "a.png"));
-  const limited = await scan(fresh.root, { stateDir: fresh.stateDir, stream: scripted(() =>
-    Array.from({ length: 100 }, (_, n) => call("read_file", { path: "a.png" }, `read-${n}`))) });
+  const limited = await scan(fresh.root, { stateDir: fresh.stateDir, stream: scripted((_context, turn) => turn === 0
+    ? Array.from({ length: 100 }, (_, n) => call("read_file", { path: "a.png" }, `read-${n}`)) : "error") });
   assert.equal(limited.files[0]!.inspection, "none");
-  assert.equal(limited.executedToolCalls, 80);
+  assert.equal(limited.executedToolCalls, 100);
   assert.equal(limited.toolCalls, 100);
-  assert.equal(limited.modelCalls, 1);
+  assert.ok(limited.modelCalls >= 2);
+  assert.equal(limited.status, "failed");
   assert.equal(limited.reasoningPending, true);
 });
 

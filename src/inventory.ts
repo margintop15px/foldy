@@ -18,6 +18,8 @@ export interface Source {
   size?: number;
   modifiedAt?: string;
   version?: string;
+  md5?: string;
+  fileReport?: { fingerprint: string; abstract: string; summary: string };
   reason?: string;
   text?: string;
   format?: "text" | "image" | "pdf";
@@ -89,6 +91,7 @@ export async function inventoryFolder(inputRoot: string, signal: AbortSignal, ex
           }
           const snapshot = await readSnapshot(root, path, limit, signal);
           source.version = snapshot.version;
+          source.md5 = createHash("md5").update(snapshot.bytes).digest("hex");
           if (source.format === "text") {
             const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(snapshot.bytes);
             if (text.includes("\0")) throw new Error("Binary content is not supported as text.");

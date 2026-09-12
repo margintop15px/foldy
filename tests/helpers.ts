@@ -37,7 +37,7 @@ export function toolResult(context: Context, name: string) {
   return JSON.parse(content.text);
 }
 
-export function scripted(turn: (context: Context, index: number) => ToolCall[] | "error" | undefined): ModelStream {
+export function scripted(turn: (context: Context, index: number) => ToolCall[] | "error" | undefined, text = "Done."): ModelStream {
   let index = 0;
   return (model, context) => {
     // Exhausted scripts have nothing more to add during the completeness check.
@@ -45,7 +45,7 @@ export function scripted(turn: (context: Context, index: number) => ToolCall[] |
     const message: AssistantMessage = {
       role: "assistant", model: model.id, provider: model.provider, api: model.api,
       timestamp: Date.now(), stopReason: reply === "error" ? "error" : reply.length ? "toolUse" : "stop",
-      content: reply === "error" ? [] : reply.length ? reply : [{ type: "text", text: "Done." }],
+      content: reply === "error" ? [] : reply.length ? reply : [{ type: "text", text }],
       usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0,
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
       ...(reply === "error" ? { errorMessage: "Local inference unavailable (offline simulation)." } : {}),
