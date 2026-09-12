@@ -1,12 +1,16 @@
+// Oracle revision 3: review leader scope corrected; Q06 invalid PNG is now corrupt. Fixture bytes are unchanged.
 // Only stage.files are copied into Foldy's root. Oracles never enter model context.
 export interface Requirement {
   id: string;
   kind: "fact" | "relationship" | "uncertainty";
   description: string;
   paths: string[];
+  /** Extra structural citation obligations; semantic entailment still requires review. */
+  locators?: { path: string; page?: number; visual?: boolean }[];
 }
+export interface BinaryAsset { asset: string; sha256: string }
 export interface Stage {
-  files: Record<string, string | null>;
+  files: Record<string, string | BinaryAsset | null>;
   expectedStatus: "complete" | "incomplete";
   required: Requirement[];
 }
@@ -20,7 +24,7 @@ const fact = (id: string, description: string, ...paths: string[]): Requirement 
 const link = (id: string, description: string, ...paths: string[]): Requirement => ({ id, description, paths, kind: "relationship" });
 
 const projectFacts = [
-  fact("owner", "Inez leads Project Kestrel, reference KST-482.", "archive/brief.md"),
+  fact("owner", "Inez leads the prototype review for Project Kestrel, reference KST-482; project leadership is not established.", "archive/brief.md"),
   fact("date", "The Kestrel review is 2026-11-18.", "archive/brief.md"),
   fact("budget", "Kestrel's review budget is EUR 375.50 (37550 cents), not EUR 37550.", "archive/brief.md"),
 ];
@@ -124,8 +128,8 @@ export const cases: Case[] = [
   },
 ];
 
-export function sourcesAt(item: Case, stage: number): Record<string, string> {
-  const files: Record<string, string> = {};
+export function sourcesAt(item: Case, stage: number): Record<string, string | BinaryAsset> {
+  const files: Record<string, string | BinaryAsset> = {};
   for (const batch of item.stages.slice(0, Math.min(stage, 2))) {
     for (const [path, content] of Object.entries(batch.files)) {
       if (content === null) delete files[path]; else files[path] = content;

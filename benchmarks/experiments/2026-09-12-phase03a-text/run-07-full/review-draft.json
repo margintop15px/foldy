@@ -1,0 +1,298 @@
+{
+  "reviewer": "Codex assistant, independent of the tested local model; manually reviewed claims and their own cited evidence. Human calibration pending.",
+  "resultsHash": "9695768c7e9e4276d3dc42e000b134ba020d39a3bcac3806c8f1a404d6c2e61f",
+  "stages": {
+    "Q01/1/1": {
+      "reportHash": "2dbd76ed680145652be5a15aad041e37f1044384d9a3bb556ae2de13f04477d7",
+      "claims": [
+        {
+          "text": "Inez leads the prototype review for Kestrel KST-482.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "owner"
+          ],
+          "reason": "The brief explicitly scopes Inez's leadership to the prototype review."
+        },
+        {
+          "text": "The KST-482 review is on 2026-11-18.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "date"
+          ],
+          "reason": "The cited brief supplies this date."
+        },
+        {
+          "text": "The review budget is EUR 375.50.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "budget"
+          ],
+          "reason": "The quoted amount and currency agree."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q01/1/2": {
+      "reportHash": "672ea59a6a64f4d79dc8f840f3c81607758addb837880f5c72c9718dae1009bc",
+      "claims": [
+        {
+          "text": "Inez leads the prototype review for Kestrel KST-482.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "owner"
+          ],
+          "reason": "The brief explicitly scopes Inez's leadership to the prototype review."
+        },
+        {
+          "text": "The KST-482 review is on 2026-11-18.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "date"
+          ],
+          "reason": "The cited brief supplies this date."
+        },
+        {
+          "text": "The review budget is EUR 375.50.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "budget"
+          ],
+          "reason": "The quoted amount and currency agree."
+        },
+        {
+          "text": "The later KST-482 note confirms the earlier review and requests booking room Birch using the review budget.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "review-link"
+          ],
+          "reason": "Both complete sources occur in this finding; booking remains a request."
+        },
+        {
+          "text": "Omar manages the KST-901 community garden seed order as a separate project.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "separate"
+          ],
+          "reason": "The garden is represented independently with its own ID and seed-order responsibility."
+        },
+        {
+          "text": "The garden seed order is due 2026-11-18.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The garden quote explicitly supplies its due date."
+        },
+        {
+          "text": "The seed-order budget is EUR 375.50.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The separate garden quote supplies this amount."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q02/1/1": {
+      "reportHash": "961e4d32ae6ff3a9a221148c56460bbee9996e56515cb35cb4941845b4388fcf",
+      "claims": [
+        {
+          "text": "Receipt RC-731 is a desk-supplies purchase from Luma Office.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "merchant"
+          ],
+          "reason": "The cited receipt gives the merchant, receipt ID and desk-supplies item description."
+        },
+        {
+          "text": "The purchase date is 2026-09-04.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "purchase-date"
+          ],
+          "reason": "The exact dated receipt field supports this."
+        },
+        {
+          "text": "The total paid is EUR 129.90.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "amount"
+          ],
+          "reason": "The cited total and currency agree."
+        },
+        {
+          "text": "The card payment reference is TX-8841.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The cited receipt labels the card payment reference explicitly."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q02/1/2": {
+      "reportHash": "0ed8f3e32bb8de2435943e04d84451b5700b360488ed8a488b8080cb66ed7006",
+      "usefulness": 2,
+      "notes": "Receipt fields, the identical-copy relationship, the matched transaction/posting comparison and all distinct statement entries are supported. The joint finding identifies the receipt by its source paths and supplies the shared reference in both cited sources; no cause for the one-day difference is invented.",
+      "claims": [
+        {
+          "text": "Receipt RC-731 is a desk-supplies purchase from Luma Office.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "merchant"
+          ],
+          "reason": "The cited receipt gives the merchant, receipt ID and desk-supplies item description."
+        },
+        {
+          "text": "The purchase date is 2026-09-04.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "purchase-date"
+          ],
+          "reason": "The exact dated receipt field supports this."
+        },
+        {
+          "text": "The total paid is EUR 129.90.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "amount"
+          ],
+          "reason": "The cited total and currency agree."
+        },
+        {
+          "text": "The card payment reference is TX-8841.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The cited receipt labels the card payment reference explicitly."
+        },
+        {
+          "text": "The two receipt paths contain identical copies of the same receipt.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "copy"
+          ],
+          "reason": "Both whole receipts are cited and agree on every field, including RC-731 and TX-8841."
+        },
+        {
+          "text": "The receipt transaction is in the statement, posted 2026-09-05, one day after purchase.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "payment-link"
+          ],
+          "reason": "The joint finding cites the original receipt and statement sharing TX-8841, with purchase September 4 and posting September 5. No cause is asserted."
+        },
+        {
+          "text": "The statement lists three transactions posted on 2026-09-05.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "All three dated rows and the column header are quoted."
+        },
+        {
+          "text": "The statement includes TX-8841 at Luma Office for EUR 129.90.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The first quoted row supplies all fields."
+        },
+        {
+          "text": "TX-9902 is River Cafe EUR 129.90 and TX-9903 is a separate Luma Hosting USD 129.90 entry.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "other-charges"
+          ],
+          "reason": "The two distinct rows preserve both references, merchants, currencies and values."
+        }
+      ]
+    }
+  }
+}

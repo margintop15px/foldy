@@ -1,0 +1,101 @@
+{
+  "reviewer": "Codex assistant; manual review of claims and uncertainty against their own citations. Human calibration pending.",
+  "resultsHash": "c8e4386db99cb0a12f4e90923b131b907f742af96a0bfdd7d4cbed05588b2f74",
+  "stages": {
+    "Q04/1/1": {
+      "reportHash": "289531e43bbbdb6765515fa6616a7c1611d6706e0a98ca82924b7cc7a746ed8c",
+      "claims": [
+        {
+          "text": "Neri is the lighthouse keeper, afraid of deep water, with courage as acting despite fear.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "character"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        },
+        {
+          "text": "She uses practical tools under a no-magic constraint.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "constraint"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required facts and all final claims supported."
+    },
+    "Q04/1/2": {
+      "reportHash": "091d19121c458e85de331804ef23c7c81010985a644a5f7814e93038fb4a930f",
+      "claims": [
+        {
+          "text": "Neri is the lighthouse keeper, afraid of deep water, with courage as acting despite fear.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "character"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        },
+        {
+          "text": "She uses practical tools under a no-magic constraint.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "constraint"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        },
+        {
+          "text": "A separate science-fiction story describes Neri as a fearless telepathic starship pilot.",
+          "findings": [
+            2
+          ],
+          "covers": [
+            "other-story"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        },
+        {
+          "text": "The storm scene belongs to the lighthouse keeper story and its keeper is Neri.",
+          "findings": [
+            3
+          ],
+          "label": "insufficient",
+          "kind": "relationship",
+          "covers": [],
+          "reason": "The sole scene quotation names neither Neri nor lighthouse. The character source is missing from this finding; no joint finding establishes the required scene-link outcome.",
+          "falseConnection": true
+        },
+        {
+          "text": "The keeper stays on the quay and helps a stranded sailor with a rope, while fear remains visible and practical tools are required.",
+          "findings": [
+            3
+          ],
+          "covers": [],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages explicitly support this statement."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "FAILED: F3 attributes Neri and lighthouse from uncited character information. The reviewer reread all three sources but did not repair or jointly cite this finding."
+    }
+  }
+}

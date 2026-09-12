@@ -1,0 +1,389 @@
+{
+  "reviewer": "Codex assistant, independent of the tested local model; manually reviewed claims and their own cited evidence. Human calibration pending.",
+  "resultsHash": "61d182655eac3f48a519965d01d80d8d41b3aa45ea9d62913b2e7f6f5ddd2afb",
+  "stages": {
+    "Q01/1/1": {
+      "reportHash": "2dbd76ed680145652be5a15aad041e37f1044384d9a3bb556ae2de13f04477d7",
+      "claims": [
+        {
+          "text": "Inez leads the prototype review for Kestrel KST-482.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "owner"
+          ],
+          "reason": "The brief explicitly scopes Inez's leadership to the prototype review."
+        },
+        {
+          "text": "The KST-482 review is on 2026-11-18.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "date"
+          ],
+          "reason": "The cited brief supplies this date."
+        },
+        {
+          "text": "The review budget is EUR 375.50.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "budget"
+          ],
+          "reason": "The quoted amount and currency agree."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q01/1/2": {
+      "reportHash": "672ea59a6a64f4d79dc8f840f3c81607758addb837880f5c72c9718dae1009bc",
+      "claims": [
+        {
+          "text": "Inez leads the prototype review for Kestrel KST-482.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "owner"
+          ],
+          "reason": "The brief explicitly scopes Inez's leadership to the prototype review."
+        },
+        {
+          "text": "The KST-482 review is on 2026-11-18.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "date"
+          ],
+          "reason": "The cited brief supplies this date."
+        },
+        {
+          "text": "The review budget is EUR 375.50.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "budget"
+          ],
+          "reason": "The quoted amount and currency agree."
+        },
+        {
+          "text": "The later KST-482 note confirms the earlier review and requests booking room Birch using the review budget.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "review-link"
+          ],
+          "reason": "Both complete sources occur in this finding; booking remains a request."
+        },
+        {
+          "text": "Omar manages the KST-901 community garden seed order as a separate project.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "separate"
+          ],
+          "reason": "The garden is represented independently with its own ID and seed-order responsibility."
+        },
+        {
+          "text": "The garden seed order is due 2026-11-18.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The garden quote explicitly supplies its due date."
+        },
+        {
+          "text": "The seed-order budget is EUR 375.50.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The separate garden quote supplies this amount."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q02/1/1": {
+      "reportHash": "961e4d32ae6ff3a9a221148c56460bbee9996e56515cb35cb4941845b4388fcf",
+      "claims": [
+        {
+          "text": "Receipt RC-731 is a desk-supplies purchase from Luma Office.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "merchant"
+          ],
+          "reason": "The cited receipt gives the merchant, receipt ID and desk-supplies item description."
+        },
+        {
+          "text": "The purchase date is 2026-09-04.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "purchase-date"
+          ],
+          "reason": "The exact dated receipt field supports this."
+        },
+        {
+          "text": "The total paid is EUR 129.90.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "amount"
+          ],
+          "reason": "The cited total and currency agree."
+        },
+        {
+          "text": "The card payment reference is TX-8841.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The cited receipt labels the card payment reference explicitly."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required outcomes and additional reported fields are supported by the finding's own citations."
+    },
+    "Q02/1/2": {
+      "reportHash": "0ed8f3e32bb8de2435943e04d84451b5700b360488ed8a488b8080cb66ed7006",
+      "usefulness": 2,
+      "notes": "Receipt fields, the identical-copy relationship, the matched transaction/posting comparison and all distinct statement entries are supported. The joint finding identifies the receipt by its source paths and supplies the shared reference in both cited sources; no cause for the one-day difference is invented.",
+      "claims": [
+        {
+          "text": "Receipt RC-731 is a desk-supplies purchase from Luma Office.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "merchant"
+          ],
+          "reason": "The cited receipt gives the merchant, receipt ID and desk-supplies item description."
+        },
+        {
+          "text": "The purchase date is 2026-09-04.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "purchase-date"
+          ],
+          "reason": "The exact dated receipt field supports this."
+        },
+        {
+          "text": "The total paid is EUR 129.90.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "amount"
+          ],
+          "reason": "The cited total and currency agree."
+        },
+        {
+          "text": "The card payment reference is TX-8841.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The cited receipt labels the card payment reference explicitly."
+        },
+        {
+          "text": "The two receipt paths contain identical copies of the same receipt.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "copy"
+          ],
+          "reason": "Both whole receipts are cited and agree on every field, including RC-731 and TX-8841."
+        },
+        {
+          "text": "The receipt transaction is in the statement, posted 2026-09-05, one day after purchase.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "payment-link"
+          ],
+          "reason": "The joint finding cites the original receipt and statement sharing TX-8841, with purchase September 4 and posting September 5. No cause is asserted."
+        },
+        {
+          "text": "The statement lists three transactions posted on 2026-09-05.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "All three dated rows and the column header are quoted."
+        },
+        {
+          "text": "The statement includes TX-8841 at Luma Office for EUR 129.90.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The first quoted row supplies all fields."
+        },
+        {
+          "text": "TX-9902 is River Cafe EUR 129.90 and TX-9903 is a separate Luma Hosting USD 129.90 entry.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "other-charges"
+          ],
+          "reason": "The two distinct rows preserve both references, merchants, currencies and values."
+        }
+      ]
+    },
+    "Q03/1/1": {
+      "reportHash": "b6124895e64ab8ddfba0efd72c83cb54b4758e51e8291dbda010b37276dd3c3c",
+      "claims": [
+        {
+          "text": "Atlas storage AT-62 originally expires 2026-12-31.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "old-date"
+          ],
+          "reason": "The original agreement states both the identity and original expiry."
+        },
+        {
+          "text": "The current status confirms the same AT-62 expiry as the original agreement.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [],
+          "reason": "Both status and original agreement are quoted; at this stage they agree."
+        },
+        {
+          "text": "The AT-62 task requests checking whether renewal is needed before the expiry and refers to the same original contract.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [],
+          "reason": "The task and original contract are both cited. A request is preserved as a request."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All saved content is supported, but the review hit the five-minute deadline before completing; runtime gate failed."
+    },
+    "Q03/1/2": {
+      "reportHash": "80d3b59d3e09309fac0252c42386bdfca0a4f4745a894a380a0f734f12638b58",
+      "claims": [
+        {
+          "text": "The original AT-62 expiry of 2026-12-31 is superseded by the signed renewal to 2027-06-30; current status confirms that new date.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "renewal",
+            "current-date"
+          ],
+          "reason": "The original, renewal and current status are all quoted and support the explicit date change."
+        },
+        {
+          "text": "All three documents directly state the dates and the renewal's superseding effect.",
+          "findings": [
+            1
+          ],
+          "label": "insufficient",
+          "kind": "uncertainty",
+          "covers": [],
+          "reason": "The uncertainty text overstates the individual sources: the original agreement does not describe the renewal or its superseding effect. The main conclusion is supported, but this blanket explanation is not."
+        },
+        {
+          "text": "Beacon equipment hire BC-18 expires on 2026-10-31.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "other-date"
+          ],
+          "reason": "The cited Beacon quote gives its identity and expiry; its uncertainty correctly attributes those fields to this document."
+        },
+        {
+          "text": "Beacon BC-18 is separate from Atlas storage agreement AT-62.",
+          "findings": [
+            2
+          ],
+          "label": "insufficient",
+          "kind": "relationship",
+          "covers": [],
+          "reason": "This finding cites only Beacon; it imports Atlas's identity from another finding without citing that source."
+        }
+      ],
+      "usefulness": 1,
+      "notes": "Run interrupted by a 40m11s low-battery sleep and terminated on wake. The saved renewal conclusion is supported, but extra uncertainty and the Beacon comparison are under-supported. This is not an inference-speed sample."
+    }
+  }
+}

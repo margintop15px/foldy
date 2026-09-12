@@ -38,6 +38,7 @@ test("A02 live: two synthetic files yield valid source-backed findings through l
   assert.ok(report.findings.some(finding => /2026-10-15/.test(finding.claim)), "The review date must be reported correctly.");
   for (const finding of report.findings) {
     for (const evidence of finding.evidence) {
+      assert.ok(evidence.type !== "visual");
       const text = before.get(evidence.path)!.toString("utf8");
       assert.equal(text.slice(evidence.start, evidence.end), evidence.quote);
       assert.ok(evidence.version.match(/^[0-9a-f]{64}$/));

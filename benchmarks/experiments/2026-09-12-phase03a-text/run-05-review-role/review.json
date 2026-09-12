@@ -1,0 +1,113 @@
+{
+  "reviewer": "Codex assistant; manual claim and uncertainty review. Independent human calibration pending.",
+  "resultsHash": "2295f1b023416b91dcb97993e9131c30fa9f5822775c3e36f34fe0f77605eb35",
+  "stages": {
+    "Q04/1/1": {
+      "reportHash": "97706a2721609a17089abf7e15a795730b99cc573b69238b0431bfede53f4d95",
+      "claims": [
+        {
+          "text": "Neri is the keeper afraid of deep water, with courage defined as acting despite fear.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "character"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        },
+        {
+          "text": "She solves problems with practical tools and no magic.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "constraint"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All final claims supported."
+    },
+    "Q04/1/2": {
+      "reportHash": "d2cd7b3ce61f730d277ac5f10b541fb978c6792e30f53ebf5d2389849f21cb99",
+      "claims": [
+        {
+          "text": "Neri is the keeper afraid of deep water, with courage defined as acting despite fear.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "character"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        },
+        {
+          "text": "She solves problems with practical tools and no magic.",
+          "findings": [
+            1
+          ],
+          "covers": [
+            "constraint"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        },
+        {
+          "text": "An unrelated science-fiction story describes Neri as a fearless telepathic starship pilot, explicitly distinct from the keeper.",
+          "findings": [
+            2
+          ],
+          "covers": [
+            "other-story"
+          ],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        },
+        {
+          "text": "The single-source scene summary is about the lighthouse story and has a no-magic constraint.",
+          "findings": [
+            3
+          ],
+          "label": "insufficient",
+          "kind": "relationship",
+          "covers": [],
+          "reason": "The attached scene excerpt gives neither lighthouse identity nor no-magic constraint. Both are borrowed from uncited character notes. Re-recording the same incomplete evidence did not fix it.",
+          "falseConnection": true
+        },
+        {
+          "text": "The keeper stays on the quay and helps a stranded sailor with a rope, with visible fear and practical tools.",
+          "findings": [
+            3
+          ],
+          "covers": [],
+          "kind": "fact",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        },
+        {
+          "text": "The scene is linked to Neri's lighthouse story and its quay/rope action fits the fear-of-water and no-magic constraints.",
+          "findings": [
+            4
+          ],
+          "covers": [
+            "scene-link"
+          ],
+          "kind": "relationship",
+          "label": "supported",
+          "reason": "The cited passages support this statement and its scope."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "FAILED strict: a supported joint finding exists, but the redundant F3 retains uncited lighthouse/no-magic details. Required scene-link is now present."
+    }
+  }
+}

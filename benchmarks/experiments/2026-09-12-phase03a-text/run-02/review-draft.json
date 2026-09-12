@@ -1,0 +1,567 @@
+{
+  "Q01/1/1": {
+    "reportHash": "eb0d076bc44d22d0e96554138a888e62ee2cfa6db4147b4e01fc2ebadca3bc4d",
+    "claims": [
+      {
+        "text": "Inez leads the KST-482 prototype review, not an asserted general project role.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "owner"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The review date is 2026-11-18.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The review budget is EUR 375.50.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "budget"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q01/1/2": {
+    "reportHash": "e3f9a7598b6daf8be13c38b8df5f6976052da75a77c97346d08af304534071b3",
+    "claims": [
+      {
+        "text": "Inez leads the KST-482 prototype review, not an asserted general project role.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "owner"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The KST-482 prototype review date is 2026-11-18.",
+        "findings": [
+          1,
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The review budget is EUR 375.50.",
+        "findings": [
+          1,
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "budget"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "Inez confirms the earlier review; the linked update requests room Birch using its budget.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [
+          "review-link"
+        ],
+        "reason": "Both complete brief and update are cited; KST-482 links them. To be booked preserves request modality."
+      },
+      {
+        "text": "KST-901 is the separate community garden seed order managed by Omar.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "separate"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "That seed order is due 2026-11-18.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The seed order has budget EUR 375.50.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q02/1/1": {
+    "reportHash": "0e6018d5a741e9bb6e53c9e764ebf103763381eb35f31b84789dac06575a576d",
+    "claims": [
+      {
+        "text": "Receipt RC-731 is from Luma Office.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "merchant"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The purchase is for desk supplies.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The purchase date is 2026-09-04.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "purchase-date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "Total paid is EUR 129.90.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "amount"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The card payment reference is TX-8841.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q02/1/2": {
+    "reportHash": "49c588afbca56869a6feaaa8290d5be7284fb406142448e4266a1cf6875727ca",
+    "claims": [
+      {
+        "text": "Receipt RC-731 is from Luma Office.",
+        "findings": [
+          1,
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "merchant"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The receipt purchase is for desk supplies.",
+        "findings": [
+          1,
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The purchase date is 2026-09-04.",
+        "findings": [
+          1,
+          2,
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "purchase-date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "Total paid is EUR 129.90.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "amount"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The receipt card reference is TX-8841.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "Statement TX-8841 is a EUR 129.90 Luma Office debit posted 2026-09-05, one day after the matching RC-731 purchase.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [
+          "payment-link"
+        ],
+        "reason": "The statement header/row and complete original receipt are cited together, including shared payment reference and both dates. No causal explanation is invented."
+      },
+      {
+        "text": "The second receipt file is an identical copy of the original RC-731 record.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [
+          "copy"
+        ],
+        "reason": "Both complete texts are cited; the finding describes a copy, not an additional purchase."
+      },
+      {
+        "text": "Two additional statement debits are TX-9902 River Cafe EUR 129.90 and TX-9903 Luma Hosting USD 129.90.",
+        "findings": [
+          4
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "other-charges"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The two additional debits were posted on 2026-09-05.",
+        "findings": [
+          4
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q03/1/1": {
+    "reportHash": "1e441e8db90093099f03926df8bf513feef75a4b68e35dd0d04253f20c268a9e",
+    "claims": [
+      {
+        "text": "Atlas storage agreement AT-62 originally expires on 2026-12-31.",
+        "findings": [
+          1,
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "old-date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "A task asks whether Atlas AT-62 needs renewal before that expiry.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The status file confirms the same current expiry as the original agreement.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [],
+        "reason": "Both status and original term are quoted; same agreement and date are explicit."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q03/1/2": {
+    "reportHash": "b25f478135f918763b5b45d2ac1aeb0e8d948384653d6ecb5cc4f02852b981d8",
+    "claims": [
+      {
+        "text": "Atlas AT-62 original term ends 2026-12-31, identified as original rather than current.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "Beacon equipment hire BC-18 expires on 2026-10-31.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "other-date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The Atlas AT-62 renewal supersedes the original expiry with 2027-06-30.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [
+          "renewal"
+        ],
+        "reason": "Both original agreement and complete signed renewal are cited. The old expiry is explicitly superseded."
+      },
+      {
+        "text": "The current status says 2027-06-30 following the signed renewal.",
+        "findings": [
+          4
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "current-date"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q04/1/1": {
+    "reportHash": "22fec2ee2265bd44efd70b3c883da132543d4b8929bf7defe9fcc65c3c93eef0",
+    "claims": [
+      {
+        "text": "Neri is the lighthouse keeper, afraid of deep water, with courage defined as acting despite fear.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "character"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "She has a no-magic constraint and uses practical tools.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "constraint"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q04/1/2": {
+    "reportHash": "6bed06b819b1f62b1feae021f547f096415e2c42319d83f980007486a8894107",
+    "claims": [
+      {
+        "text": "Neri is the lighthouse keeper, afraid of deep water, with courage defined as acting despite fear.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "character"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "She has a no-magic constraint and uses practical tools.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "constraint"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The storm-scene keeper is named Neri and belongs to the lighthouse story.",
+        "findings": [
+          2
+        ],
+        "label": "insufficient",
+        "kind": "relationship",
+        "covers": [],
+        "reason": "This finding cites only storm.txt. That excerpt says keeper, without Neri or lighthouse. A separate later joint finding does not repair its evidence.",
+        "falseConnection": true
+      },
+      {
+        "text": "The keeper stays on the quay and uses a rope to help a stranded sailor.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The scene requires visible fear and practical-tool resolution.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "A separate science-fiction story describes Neri as a fearless telepathic starship pilot and explicitly distinguishes her from the keeper.",
+        "findings": [
+          3
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [
+          "other-story"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The storm scene refers to the character notes, which define Neri as the lighthouse keeper afraid of deep water, using practical tools without magic.",
+        "findings": [
+          4
+        ],
+        "label": "supported",
+        "kind": "relationship",
+        "covers": [],
+        "reason": "The joint references establish identity and constraints. This finding does not describe the quay/rope action or cite that passage, so the complete scene-link outcome is still missing."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "FAILED strict gate: F2 attributes Neri/lighthouse using only the unnamed keeper scene; F4 adds a supported identity link but leaves F2 current and omits the practical quay/rope contribution required in a joint finding."
+  },
+  "Q05/1/1": {
+    "reportHash": "da5d6a4f23781663df156c01317ea5561b63c57ee832c8298105ea429c7543ea",
+    "claims": [
+      {
+        "text": "OR-517 has an engineering proposal for launch on 2026-11-09, not a final decision.",
+        "findings": [
+          1
+        ],
+        "label": "supported",
+        "kind": "uncertainty",
+        "covers": [
+          "proposal"
+        ],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  },
+  "Q05/1/2": {
+    "reportHash": "8164b13fb9e68ecd74fdf3c4208d17ec201046dc594f77902d5cd2e29bf77371",
+    "claims": [
+      {
+        "text": "Engineering proposes 2026-11-09 for OR-517, without a final decision.",
+        "findings": [
+          1,
+          2
+        ],
+        "label": "supported",
+        "kind": "fact",
+        "covers": [],
+        "reason": "The cited passages explicitly support this statement and its scope."
+      },
+      {
+        "text": "The marketing proposal is 2026-11-16 for the same release; both remain proposals, and marketing says neither department has decision authority.",
+        "findings": [
+          2
+        ],
+        "label": "supported",
+        "kind": "uncertainty",
+        "covers": [
+          "conflict"
+        ],
+        "reason": "Both dated proposals and the explicit lack of authority are quoted. The output preserves the conflict and selects neither date."
+      }
+    ],
+    "usefulness": 2,
+    "notes": "All final claims and uncertainty reviewed against their own cited passages; required outcomes supported."
+  }
+}

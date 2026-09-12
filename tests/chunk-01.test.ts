@@ -37,6 +37,7 @@ test("A01/A02: canonical root, exact versioned evidence, CSV text, unchanged sou
   assert.equal(report.status, "complete");
   assert.equal(report.findings.length, 2);
   const evidence = report.findings[0]!.evidence[0]!;
+  assert.ok(evidence.type !== "visual");
   assert.equal(evidence.startLine, 2);
   assert.equal(evidence.version, createHash("sha256").update(await readFile(join(root, evidence.path))).digest("hex"));
   assert.deepEqual(await tree(root), before);
@@ -127,13 +128,14 @@ test("A06: invalid UTF-8, unsupported formats, oversized and unreadable files st
   await writeFile(join(root, "private.txt"), "Private.");
   await chmod(join(root, "private.txt"), 0);
   t.after(() => chmod(join(root, "private.txt"), 0o600).catch(() => {}));
-  const report = await scan(root, { stream: scripted((_context, index) => index === 0 ? [read("ok.txt")] : []) });
+  const report = await scan(root, { stream: scripted((_context, index) => index === 0 ? [read("ok.txt"), read("scan.pdf"), read("image.png")] : []) });
   const statuses = Object.fromEntries(report.files.map(source => [source.path, source.status]));
   assert.equal(report.status, "incomplete");
   assert.equal(statuses["invalid.txt"], "error");
   assert.equal(statuses["private.txt"], "error");
   assert.equal(statuses["large.txt"], "skipped");
-  for (const path of ["scan.pdf", "image.png", "sheet.xlsx"]) assert.equal(statuses[path], "unsupported");
+  for (const path of ["scan.pdf", "image.png"]) assert.equal(statuses[path], "error");
+  assert.equal(statuses["sheet.xlsx"], "unsupported");
   assert.equal(report.files.find(source => source.path === "ok.txt")?.inspection, "full");
 });
 
@@ -179,19 +181,25 @@ test("A01/A02: local model preflight refuses cloud weights before sending docume
 test("A02/RUN-02: Pi compaction uses the same offline model replacement", async t => {
   const { root } = await fixture(t);
   let turns = 0;
+  const responseLimits: (number | undefined)[] = [];
+  const reply = scripted(() => { turns++; return []; });
   const session = await createScanSession(root, [], { name: "offline-test", contextWindow: 32_768 },
-    new AbortController().signal, scripted(() => { turns++; return []; }));
+    new AbortController().signal, (model, context, options) => {
+      responseLimits.push(options?.maxTokens);
+      return reply(model, context, options);
+    });
   try {
     await session.prompt("Synthetic project note. ".repeat(800));
     await session.prompt("Explain the synthetic note. ".repeat(800));
     await session.compact();
     assert.equal(turns, 3);
+    assert.deepEqual(responseLimits, [8_192, 8_192, Math.floor(0.8 * 8_192)], "Compaction keeps Pi's smaller summary budget.");
   } finally { await session.abort(); session.dispose(); }
 });
 
 test("A02: advertised thinking selects low effort and uses the bounded local provider", async t => {
   const { root } = await fixture(t);
-  for (const thinking of [false, true]) {
+  for (const [thinking, contextWindow] of [[false, 8_192], [true, 16_384], [true, 32_768]] as const) {
     let inferenceRequests = 0;
     let inferenceBody: Record<string, unknown> | undefined;
     t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
@@ -203,7 +211,7 @@ test("A02: advertised thinking selects low effort and uses the bounded local pro
         return new Response(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`, { headers: { "Content-Type": "text/event-stream" } });
       }
       if (path === "/api/show") return Response.json({ model_info: { "general.architecture": "qwen" }, capabilities: thinking ? ["tools", "thinking"] : ["tools"] });
-      if (path === "/api/ps") return Response.json({ models: [{ name: "test:latest", context_length: 16_384, digest: "synthetic" }] });
+      if (path === "/api/ps") return Response.json({ models: [{ name: "test:latest", context_length: contextWindow, digest: "synthetic" }] });
       return Response.json({ version: "test" });
     });
     const model = await prepareLocalModel("test", new AbortController().signal);
@@ -214,7 +222,11 @@ test("A02: advertised thinking selects low effort and uses the bounded local pro
       assert.equal(inferenceRequests, 1, "Inspect the actual OpenAI-compatible request with inference replaced by local test SSE.");
       assert.ok(inferenceBody);
       assert.equal(inferenceBody.reasoning_effort, thinking ? "low" : "none");
-      assert.equal(inferenceBody.max_tokens, 2_048);
+      assert.equal(session.agent.state.model?.maxTokens, contextWindow === 8_192 ? 4_096 : 8_192);
+      if (contextWindow === 8_192) {
+        assert.ok(Number(inferenceBody.max_tokens) > 2_048 && Number(inferenceBody.max_tokens) <= 4_096,
+          "The response ceiling increases while Pi may further reduce it for input and its context safety margin.");
+      } else assert.equal(inferenceBody.max_tokens, 8_192);
       assert.equal(inferenceBody.temperature, 0);
       assert.equal((session.agent.state.messages.at(-1) as AssistantMessage).stopReason, "stop");
     }
