@@ -149,6 +149,7 @@ export async function openStore(root: string, stateDir: string | undefined, anal
       source.sourceId = before?.id ?? randomUUID();
       const readable = source.status === "ready" && source.format !== undefined && source.version !== undefined;
       const version = readable ? source.version! : null;
+      if (readable && before?.version === version) source.fileReport = JSON.parse(before.metadata).fileReport;
       if (readable && source.format !== "text") {
         const row = db.prepare("SELECT document FROM versions WHERE source_id = ? AND version = ?").get(source.sourceId, version!);
         const previous = row?.document ? JSON.parse(row.document as string) as DocumentCoverage : undefined;

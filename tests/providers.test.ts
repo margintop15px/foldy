@@ -64,7 +64,7 @@ test("Providers: OpenAI serializes exact PDF pixels and tool results, validates 
       const body = await request.json();
       const index = requests++;
       assert.equal(body.model, "gpt-4.1-mini");
-      assert.equal(body.max_output_tokens, 8_192);
+      assert.equal(body.max_output_tokens, undefined);
       assert.equal(body.store, false);
       assert.equal(body.temperature, 0);
       assert.equal(body.reasoning_effort, undefined);
@@ -251,7 +251,7 @@ test("Providers: OpenAI compaction uses the same transport and reasoning models 
       await session.prompt("Summarize the synthetic input. ".repeat(800));
       await session.compact();
       assert.equal(bodies.length, 3);
-      assert.deepEqual(bodies.map(body => body.max_output_tokens), [8_192, 8_192, Math.floor(0.8 * 8_192)]);
+      assert.deepEqual(bodies.map(body => body.max_output_tokens), [undefined, undefined, Math.floor(0.8 * 8_192)]);
       assert.ok(bodies.every(body => body.model === name && body.store === false));
       if (name === "gpt-5-mini") {
         assert.ok(bodies.every(body => body.temperature === undefined && body.reasoning.effort === "low"));

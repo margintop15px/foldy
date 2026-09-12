@@ -4,14 +4,14 @@ import {
   type AgentSession, type ResourceLoader, type ToolDefinition,
 } from "@earendil-works/pi-coding-agent";
 import { InMemoryCredentialStore, lazyStream, type Context } from "@earendil-works/pi-ai";
-import { streamSimple as streamCompletions } from "@earendil-works/pi-ai/api/openai-completions";
-import { streamSimple as streamResponses } from "@earendil-works/pi-ai/api/openai-responses";
+import { stream as streamCompletions } from "@earendil-works/pi-ai/api/openai-completions";
+import { stream as streamResponses } from "@earendil-works/pi-ai/api/openai-responses";
 import { openaiProvider } from "@earendil-works/pi-ai/providers/openai";
 
 export const OLLAMA_URL = "http://127.0.0.1:11434";
 export const DEFAULT_MODEL = "qwen3.5:9b";
 export const DEFAULT_OPENAI_MODEL = "gpt-4.1-mini";
-export const MAX_RESPONSE_TOKENS = 8_192;
+export const COMPACTION_RESERVE_TOKENS = 8_192;
 // Bump when reasoning instructions or evidence rules change: old conclusions need re-evaluation.
 export const ANALYSIS_REVISION = "16";
 export type ModelStream = AgentSession["agent"]["streamFunction"];
@@ -228,8 +228,8 @@ export async function createScanSession(
     onResponse?.({ httpStatus: response.status, requestId: response.headers.get("x-request-id") ?? undefined });
     return response;
   } : localFetch;
-  // Leave at least half the effective context for source material and tool history.
-  const maxTokens = Math.min(MAX_RESPONSE_TOKENS, Math.floor(model.contextWindow / 2));
+  // Reserve context for Pi's internal summaries; ordinary responses are temporarily uncapped.
+  const reserveTokens = Math.min(COMPACTION_RESERVE_TOKENS, Math.floor(model.contextWindow / 2));
   const runtime = await ModelRuntime.create({
     credentials: new InMemoryCredentialStore(), modelsPath: null,
     allowModelNetwork: false, refreshOnCreate: false, signal,
@@ -242,7 +242,9 @@ export async function createScanSession(
       onModelCall?.(context);
       const configured = {
         ...options, apiKey, fetch: modelFetch, maxRetries: 0,
-        maxTokens: Math.min(options?.maxTokens ?? maxTokens, maxTokens),
+        // Use the raw provider stream below so streamSimple cannot add its default output cap.
+        // Explicit options.maxTokens is retained for Pi's internal compaction summaries only.
+        reasoningEffort: model.reasoningEffort === "low" ? "low" as const : undefined,
         temperature: cloud && model.reasoningEffort === "low" ? undefined : 0,
         samplingParams: cloud ? { store: false } : { reasoning_effort: model.reasoningEffort ?? "none" },
         signal: options?.signal ? AbortSignal.any([signal, options.signal]) : signal,
@@ -254,7 +256,7 @@ export async function createScanSession(
     models: [{
       ...catalogModel,
       id: model.name, name: model.name, reasoning: model.reasoningEffort === "low", input: model.capabilities?.includes("vision") ? ["text", "image"] : ["text"],
-      contextWindow: model.contextWindow, maxTokens,
+      contextWindow: model.contextWindow, maxTokens: reserveTokens,
       cost: catalogModel?.cost ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       compat: catalogModel?.compat ?? { maxTokensField: "max_tokens", supportsDeveloperRole: false, supportsStore: false, supportsReasoningEffort: false },
     }],
@@ -279,7 +281,7 @@ export async function createScanSession(
     tools: tools.map(tool => tool.name), customTools: tools, resourceLoader: resources,
     sessionManager: SessionManager.inMemory(root),
     settingsManager: SettingsManager.inMemory({
-      compaction: { enabled: true, reserveTokens: maxTokens, keepRecentTokens: 2_048 },
+      compaction: { enabled: true, reserveTokens, keepRecentTokens: 2_048 },
       retry: { enabled: false, provider: { maxRetries: 0 } },
       enableAnalytics: false, enableInstallTelemetry: false, enableSkillCommands: false,
     }),

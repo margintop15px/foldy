@@ -132,7 +132,7 @@ test("A03/CTX-01: a reasoning upgrade migrates old state, keeps history, and rev
   assert.deepEqual(await tree(root), before);
 });
 
-test("A03/RUN-02: completeness can add an omission without resetting the tool budget", async t => {
+test("A03/RUN-02: completeness adds omissions and can continue beyond the former tool quota", async t => {
   const { root, stateDir } = await fixture(t);
   await writeFile(join(root, "note.txt"), "First fact. Second fact.");
   const report = await scan(root, { stateDir, stream: scripted((context, index) => {
@@ -147,13 +147,13 @@ test("A03/RUN-02: completeness can add an omission without resetting the tool bu
   let turns = 0;
   const limited = await scan(root, { stateDir, stream: scripted((_context, index) => {
     turns++;
-    if (index === 1) return [];
+    if (index === 1 || index > 2) return [];
     return Array.from({ length: index === 0 ? 18 : 3 }, (_, n) => ({ ...read("note.txt"), id: `read-${index}-${n}` }));
   }) });
-  assert.equal(turns, 3);
-  assert.equal(limited.executedToolCalls, 20);
+  assert.equal(turns, 4);
+  assert.equal(limited.executedToolCalls, 21);
   assert.equal(limited.toolCalls, 21);
-  assert.equal(limited.reasoningPending, true);
+  assert.equal(limited.reasoningPending, false);
 });
 
 test("A03/A09: changed, missing, unreadable and reverted sources cannot supply stale current conclusions", async t => {

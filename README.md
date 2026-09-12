@@ -16,9 +16,35 @@ npm run foldy -- scan ./tests/fixtures/text
 
 Replace the fixture path with the folder to inspect. The result is JSON containing the inventory, inspection coverage, current findings, and errors. Exit codes: `0` for complete inspection, `2` for incomplete inspection, and `1` for a failed run.
 
-The CLI saves exactly the JSON printed on stdout to `<canonical-root>/.foldy.json`, including cached, incomplete and failed reports. This is a complete view of current accumulated findings, not just the latest changes. SQLite continues to provide incremental analysis and caching; writing the JSON does not trigger another analysis. The report and reserved `.foldy.json.<uuid>.tmp` files are excluded from the root inventory. The library `scan()` itself does not write this export.
+The CLI saves exactly the selected JSON report printed on stdout to `<canonical-root>/.foldy.json`, including cached, incomplete and failed reports. The full format includes all current accumulated findings. SQLite continues to provide incremental analysis and caching; writing the JSON does not trigger another analysis. The report and reserved `.foldy.json.<uuid>.tmp` files are excluded from the root inventory. The library `scan()` itself does not write this export.
 
-Reports are written through an exclusive temporary file and atomic rename. Exceptions before a report is returned leave the previous export intact; a save failure exits with code `1`. Symlink and directory destinations are rejected. Check `status`, `reasoningPending` and `observedAt` when reading the export later. Only current findings are exported; history remains in SQLite.
+Reports are written through an exclusive temporary file and atomic rename. Exceptions before a report is returned leave the previous export intact; a save failure exits with code `1`. Symlink and directory destinations are rejected. The full format includes `status`, `reasoningPending` and `observedAt` for checking the export later. Only current findings are exported; history remains in SQLite.
+
+Use `--report flat` for a JSON array with one entry per regular file:
+
+```sh
+npm run foldy -- scan ./documents --report flat
+```
+
+```ts
+{
+  filePath: string;                   // relative to the scan root
+  fileHash: string | null;            // MD5 of the original file bytes
+  fileType: "text" | "image" | "pdf" | null;
+  abstract: string;                   // detailed model-written description
+  summary: string;                    // concise model-written sentence
+}[]
+```
+
+Unsupported, skipped, and unreadable regular files remain in the array. Unavailable hashes and types are `null`. Directories, symlinks, and other non-file entries are excluded. An empty inventory produces `[]`.
+
+The selected model writes each `abstract` as a detailed paragraph and each `summary` as a concise description of the main point. The prompt asks for a shorter, independently worded summary. During current testing, nonempty text is accepted without character-length or distinctness rejection. Reporting uses that file's saved text quotations and visual observations; text from other files in a joint finding is excluded. The flat output contains no `findings` field. Files without usable evidence have empty text fields.
+
+The first flat request generates missing reports, including after a completed full scan. Generated text is cached with the file's saved metadata; unchanged evidence, source version, provider, model tag and reporting prompt reuse it without model calls. Changed entries regenerate individually within the scan's existing deadline. Reporting uses the selected provider, so OpenAI reporting also needs credentials and incurs API usage. Malformed JSON or empty text fails visibly for that file while later files continue. Rerun the same command to retry failed reports and reuse successful ones.
+
+MD5 is computed from the bytes already read during inventory and is also available as `md5` in full-report file metadata. SHA-256 `version` values still identify source versions and evidence.
+
+Omit the flag or use `--report full` for the existing detailed report, including scan status and errors. Both formats use the same exit codes and saved scan results.
 
 Run the same command again: unchanged, completed work returns `cached: true` with zero model and tool calls, without contacting the model provider. New or changed inputs, removed or unverifiable evidence, a different provider, model tag or analysis revision, or unfinished reasoning trigger another run. `reasoningPending` distinguishes unfinished reasoning from unsupported files, which stay visible without repeatedly triggering inference. Stable corrupt or encrypted documents stay visible without repeated inference. A root with no eligible readable inputs makes no model requests.
 
@@ -34,7 +60,7 @@ Ollama is the default provider. Select another installed local model with `FOLDY
 
 Foldy requests low reasoning effort when the installed model advertises thinking support. The selected mode is recorded in each report. Models without that capability use no thinking.
 
-Each model response can generate up to 8,192 tokens, capped at half the effective context (4,096 with an 8,192-token context). This applies to text and document scans. The limit bounds generation time and context use; it is not a billing limit. Pi reserves that output space before compaction and can further reduce a request for remaining context or a shorter summary. The scan's five-minute text / 15-minute document deadline still applies.
+Application tool-call quotas and ordinary response-token caps are temporarily disabled for report testing. Normal OpenAI and Ollama requests omit output-token limits; provider and model context limits still apply. Pi retains its internal compaction budget. The scan's five-minute text / 15-minute document deadline still applies, as does Ctrl-C cancellation.
 
 Ollama must report an effective context of at least 8,192 tokens. Foldy reads the running model's context from `/api/ps` and gives that value to Pi. The evaluated Qwen setup uses 16,384 tokens. If a server uses a smaller context, configure an Ollama model with `PARAMETER num_ctx 16384` as described in [Ollama's context configuration](https://docs.ollama.com/api/openai-compatibility#setting-the-context-size).
 
@@ -80,7 +106,7 @@ For text and document quality, run `npm run bench -- --suite all --out benchmark
 - At most 200 inventory entries and 32 directory levels. Text inputs: 64 KiB. Images: 20 MiB and 64 million pixels. PDFs: 50 MiB. Page text: 64 KiB, explicitly partial when capped. Text reads return 4,000 UTF-16 characters with continuation offsets; PDF pages are one-based.
 - Previews preserve aspect ratio, have a longest edge of at most 2,000 pixels and an encoded payload of at most 4.5 MiB. Reductions and extraction warnings are reported. Original binary bytes and derived previews/text are cached in SQLite, while inspection coverage stays separate for each source.
 - One fixed helper processes one file/page at a time, with a 30-second deadline. Cancellation kills and reaps it. The helper uses buffers and package-local PDF resources, without document URLs, attachments or embedded scripts. Process isolation is not an OS security sandbox or a hard native-memory limit.
-- Text-only scans have 20 requested tool calls and five minutes; document scans have 80 calls and 15 minutes. This includes loading and one review pass in a fresh Pi context. Both passes share the original counters/deadline. Reaching a limit leaves work pending. A successful unchanged cache hit performs no model, extraction or rendering work.
+- Text-only scans have five minutes; document scans have 15 minutes. This includes loading and one review pass in a fresh Pi context. Tool calls are counted but temporarily have no quota (`limits.maxToolCalls: null`). Reaching the deadline leaves work pending. A successful unchanged cache hit performs no model, extraction or rendering work.
 - New text findings can cite a `textRef` returned by `read_file`: Foldy attaches the exact original excerpt, up to the 4,000-character read size, with its source version and location. The model can still copy a shorter exact `quote` of at most 2,000 characters. Image observations need a visual reference whose pixels reached a successful model turn. PDF citations identify their page; image-read text remains a visual interpretation. Successful compaction and the fresh review context clear text and visual references. `replacesFindingId` can retire a model finding after validating its complete replacement; history stays in SQLite. The model overview labels earlier coverage `previousInspection` and gives saved summaries `readBeforeCiting` locations. Persisted inspection alone does not authorize a new citation. Reference checks establish where quotations came from; they cannot establish whether every model interpretation is correct.
 - `agentUsage` reports token counts for ordinary agent turns and the largest response. `inputTokens` excludes separately reported prompt-cache reads/writes. The counters exclude separate Pi compaction and Ollama preflight calls; `durationMs` covers the whole scan.
 - Shared context uses a bounded overview and literal SQLite text search, with ten-result pages and 240-character snippets. Search does not count as inspection. There is no vector index or accumulated Pi conversation.

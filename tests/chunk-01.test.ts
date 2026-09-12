@@ -193,7 +193,7 @@ test("A02/RUN-02: Pi compaction uses the same offline model replacement", async 
     await session.prompt("Explain the synthetic note. ".repeat(800));
     await session.compact();
     assert.equal(turns, 3);
-    assert.deepEqual(responseLimits, [8_192, 8_192, Math.floor(0.8 * 8_192)], "Compaction keeps Pi's smaller summary budget.");
+    assert.deepEqual(responseLimits, [undefined, undefined, Math.floor(0.8 * 8_192)], "Only Pi's internal compaction keeps a summary budget.");
   } finally { await session.abort(); session.dispose(); }
 });
 
@@ -223,10 +223,8 @@ test("A02: advertised thinking selects low effort and uses the bounded local pro
       assert.ok(inferenceBody);
       assert.equal(inferenceBody.reasoning_effort, thinking ? "low" : "none");
       assert.equal(session.agent.state.model?.maxTokens, contextWindow === 8_192 ? 4_096 : 8_192);
-      if (contextWindow === 8_192) {
-        assert.ok(Number(inferenceBody.max_tokens) > 2_048 && Number(inferenceBody.max_tokens) <= 4_096,
-          "The response ceiling increases while Pi may further reduce it for input and its context safety margin.");
-      } else assert.equal(inferenceBody.max_tokens, 8_192);
+      assert.equal(inferenceBody.max_tokens, undefined);
+      assert.equal(inferenceBody.max_completion_tokens, undefined);
       assert.equal(inferenceBody.temperature, 0);
       assert.equal((session.agent.state.messages.at(-1) as AssistantMessage).stopReason, "stop");
     }
@@ -234,32 +232,33 @@ test("A02: advertised thinking selects low effort and uses the bounded local pro
   }
 });
 
-test("RUN-02: an oversized tool batch executes at most 20 calls and does not start another model turn", async t => {
+test("RUN-02: tool batches can exceed the temporarily removed 20-call quota", async t => {
   const { root } = await fixture(t);
   await writeFile(join(root, "note.txt"), "Keep this.");
   let turns = 0;
   const report = await scan(root, { stream: scripted(() => {
     turns++;
-    return Array.from({ length: 25 }, (_, index) => ({ ...read("note.txt"), id: `read-${index}` }));
+    return turns === 1 ? Array.from({ length: 25 }, (_, index) => ({ ...read("note.txt"), id: `read-${index}` })) : [];
   }) });
-  assert.equal(report.status, "incomplete");
-  assert.equal(report.executedToolCalls, 20);
+  assert.equal(report.status, "complete");
+  assert.equal(report.limits.maxToolCalls, null);
+  assert.equal(report.executedToolCalls, 25);
   assert.equal(report.toolCalls, 25);
-  assert.equal(turns, 1);
+  assert.equal(turns, 3);
 });
 
-test("RUN-02: invalid and unknown tool calls consume the budget too", async t => {
+test("RUN-02: invalid and unknown tool calls remain refused without a call quota", async t => {
   const { root } = await fixture(t);
   await writeFile(join(root, "note.txt"), "Keep this.");
   let turns = 0;
   const report = await scan(root, { stream: scripted(() => {
     turns++;
-    return [call("bash", {}), call("read_file", {})];
+    return turns <= 12 ? [call("bash", {}), call("read_file", {})] : [];
   }) });
   assert.equal(report.status, "incomplete");
-  assert.equal(report.toolCalls, 20);
+  assert.equal(report.toolCalls, 24);
   assert.equal(report.executedToolCalls, 0);
-  assert.equal(turns, 10);
+  assert.equal(turns, 14);
 });
 
 test("RUN-02: wall-clock budget aborts model work and leaves inputs pending", async t => {

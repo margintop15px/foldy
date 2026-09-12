@@ -6,13 +6,12 @@ import { errorText, inspectionCoverage, inventoryFolder, READ_CHARACTERS, readSn
 import { ANALYSIS_REVISION, createScanSession, prepareLocalModel, prepareOpenAIModel, selectModel, REVIEW_PROMPT, SYSTEM_PROMPT, type ModelInfo, type ModelResponse, type ModelStream } from "./model.ts";
 import { EXTRACTOR_REVISION, MAX_EXTRACTION_MS, extractDocument, type DocumentPage, type PreviewInfo } from "./documents.ts";
 import { openStore, type Evidence } from "./store.ts";
+import { FILE_REPORT_PROMPT, fileReportEvidence, generateFileReport, type FileReportText } from "./report.ts";
 
 export type { Evidence, Finding } from "./store.ts";
 
-export const MAX_TOOL_CALLS = 20;
 export const MAX_RUN_MS = 5 * 60 * 1_000;
 export const MAX_DOCUMENT_RUN_MS = 15 * 60 * 1_000;
-export const MAX_DOCUMENT_TOOL_CALLS = 80;
 
 export interface ScanOptions {
   provider?: string;
@@ -20,6 +19,8 @@ export interface ScanOptions {
   /** State base directory; each canonical root gets its own hash-named subdirectory. */
   stateDir?: string;
   signal?: AbortSignal;
+  /** Generate and cache per-file prose for the flat CLI report. */
+  generateFileReports?: boolean;
   /** A simple model replacement for offline tests; never opens a network connection. */
   stream?: ModelStream;
   /** Model metadata for an offline stream replacement only. */
@@ -51,7 +52,8 @@ export async function scan(root: string, options: ScanOptions = {}) {
   const { provider, modelTag } = selectModel(options.provider, options.model);
   const started = Date.now();
   const controller = new AbortController();
-  let limits = { maxRunMs: MAX_DOCUMENT_RUN_MS, maxToolCalls: MAX_DOCUMENT_TOOL_CALLS };
+  // Temporary: no application tool-call quota while testing complete report generation.
+  let limits = { maxRunMs: MAX_DOCUMENT_RUN_MS, maxToolCalls: null };
   const expire = () => controller.abort(new Error("Run time budget reached; scan again to retry."));
   let timeout = setTimeout(expire, Math.min(options.maxRunMs ?? limits.maxRunMs, limits.maxRunMs));
   const signal = options.signal ? AbortSignal.any([controller.signal, options.signal]) : controller.signal;
@@ -70,14 +72,14 @@ export async function scan(root: string, options: ScanOptions = {}) {
     if (inventoryStorageError) throw inventoryStorageError;
     const documentRun = inventory.sources.some(source => source.status === "ready" && (source.format === "image" || source.format === "pdf"));
     limits = { maxRunMs: Math.min(options.maxRunMs ?? Infinity, documentRun ? MAX_DOCUMENT_RUN_MS : MAX_RUN_MS),
-      maxToolCalls: documentRun ? MAX_DOCUMENT_TOOL_CALLS : MAX_TOOL_CALLS };
+      maxToolCalls: null };
     clearTimeout(timeout);
     if (Date.now() - started >= limits.maxRunMs) expire();
     else timeout = setTimeout(expire, limits.maxRunMs - (Date.now() - started));
     const changes = store.reconcile(inventory);
     const previousModel: ModelInfo | undefined = store.previous.model_info ? JSON.parse(store.previous.model_info) : undefined;
     const rebuildingKnowledge = store.previous.analysis_revision !== ANALYSIS_REVISION;
-    const cached = !rebuildingKnowledge && changes.length === 0 && !store.previous.pending && store.previous.model_tag === modelTag &&
+    let cached = !rebuildingKnowledge && changes.length === 0 && !store.previous.pending && store.previous.model_tag === modelTag &&
       store.previous.model_provider === provider &&
       inventory.enumerationComplete && !signal.aborted;
     const errors = [...inventory.errors];
@@ -117,7 +119,6 @@ export async function scan(root: string, options: ScanOptions = {}) {
     const findingWrites = { accepted: 0, rejected: 0 };
     // Agent turns only; Pi's separate compaction and Ollama preflight are excluded.
     const agentUsage = { inputTokens: 0, outputTokens: 0, maxResponseTokens: 0, thinkingResponses: 0 };
-    let budgetReached = false;
     let model = cached ? previousModel : undefined;
     if (model) vision = model.capabilities?.includes("vision") ?? false;
     let failed = false;
@@ -375,8 +376,6 @@ export async function scan(root: string, options: ScanOptions = {}) {
           signal.addEventListener("abort", abortSession, { once: true });
           signal.throwIfAborted();
           // Count all requested calls, including unknown tools and invalid arguments.
-          // The identity set admits only the calls inside this run's budget, including oversized batches.
-          const allowed = new Set<object>();
           session.agent.subscribe(event => {
             if (event.type === "tool_execution_start" || event.type === "tool_execution_end") options.onToolEvent?.(event);
             if (event.type === "tool_execution_end" && event.toolName === "record_finding") {
@@ -397,10 +396,8 @@ export async function scan(root: string, options: ScanOptions = {}) {
               if (event.message.content.some(block => block.type === "thinking" && block.thinking.length > 0)) agentUsage.thinkingResponses++;
               for (const block of event.message.content) {
                 if (block.type !== "toolCall") continue;
-                if (toolCalls < limits.maxToolCalls) allowed.add(block);
                 toolCalls++;
               }
-              if (toolCalls >= limits.maxToolCalls) budgetReached = true;
               if (event.message.stopReason === "error" || event.message.stopReason === "aborted") {
                 failed = true;
                 errors.push(event.message.errorMessage ?? "Model run did not complete.");
@@ -414,12 +411,12 @@ export async function scan(root: string, options: ScanOptions = {}) {
                 .map((item: { text: string }) => item.text).join("\n")}`);
             }
           });
-          session.agent.beforeToolCall = async ({ toolCall }) => {
-            if (signal.aborted || !allowed.has(toolCall)) return { block: true, reason: "Run budget reached.", terminate: true };
+          session.agent.beforeToolCall = async () => {
+            if (signal.aborted) return { block: true, reason: "Scan cancelled.", terminate: true };
             executedToolCalls++;
             return undefined;
           };
-          session.agent.shouldStopAfterTurn = () => budgetReached || signal.aborted;
+          session.agent.shouldStopAfterTurn = () => signal.aborted;
         }
         await startSession();
         const changedPaths = new Set(changes.map(change => change.path));
@@ -437,8 +434,8 @@ For a connection to earlier knowledge, read both sources and save one finding wi
 Saved findings remain available; do not repeat them. If rebuildingKnowledge is true, re-evaluate all readable files under the updated evidence rules.
 The overview is bounded; search_context searches all current sources and findings, including omitted entries.
 Untrusted folder overview:\n${JSON.stringify(overview)}`);
-        // One review pass in a fresh context, sharing the model, tool counter and wall-clock deadline.
-        if (!failed && !budgetReached && !signal.aborted) {
+        // One review pass in a fresh context, sharing the model and wall-clock deadline.
+        if (!failed && !signal.aborted) {
           signal.removeEventListener("abort", abortSession!);
           await session!.abort();
           session!.dispose();
@@ -446,7 +443,7 @@ Untrusted folder overview:\n${JSON.stringify(overview)}`);
           await startSession(true);
           const remaining = inventory.sources.filter(source => needsInspection(source))
             .map(source => ({ path: source.path, ...nextRead(source), document: documentOverview(source) }));
-          await session!.prompt(`Check completeness before finishing. You have ${limits.maxToolCalls - toolCalls} tool calls left in the original run budget.
+          await session!.prompt(`Check completeness before finishing. Continue until the readable work is complete; there is no tool-call quota.
 You are reviewing saved knowledge in a fresh context; previous reads do not authorize new citations.
 Read the current input files as needed to check omissions, and reread evidence before replacing a finding.
 First audit EVERY saved finding against ONLY its own quotations, including every name, role, date, amount, status, and uncertainty phrase.
@@ -470,29 +467,67 @@ Untrusted saved findings: ${JSON.stringify(boundedRows(store.findings().map(({ i
     const rejectedAllFindings = findingWrites.rejected > 0 && findingWrites.accepted === 0;
     if (rejectedAllFindings) errors.push(`No finding write succeeded; ${findingWrites.rejected} attempts were rejected. Work remains pending; scan again to retry.`);
     if (signal.aborted) errors.push(errorText(signal.reason));
-    if (budgetReached) errors.push(`The ${limits.maxToolCalls}-tool-call budget was reached. Work is incomplete; scan again to retry.`);
     if (!cached && !signal.aborted) for (const source of inventory.sources) {
       if (source.status === "ready" && source.format && source.format !== "text") {
         try { await verify(source); } catch { /* The source reason and invalidation are already recorded. */ }
       }
     }
+    const findings = store.findings();
+    const fileReports: Record<string, FileReportText> = Object.create(null);
+    let reportFailed = false;
+    if (options.generateFileReports && !failed && !signal.aborted) {
+      for (const source of inventory.sources) {
+        if (source.kind !== "file" || source.status !== "ready" || !source.version) continue;
+        const input = fileReportEvidence(source, findings);
+        if (!input.excerpts.length && !input.visualFindings.length) continue;
+        const fingerprint = createHash("sha256").update(JSON.stringify({ prompt: FILE_REPORT_PROMPT,
+          version: source.version, provider, modelTag, input })).digest("hex");
+        if (source.fileReport?.fingerprint !== fingerprint) {
+          cached = false;
+          try {
+            signal.throwIfAborted();
+            model ??= options.stream ? { ...(options.offlineModel ?? (provider === "openai" ? prepareOpenAIModel(modelTag)
+              : { name: "offline-test", contextWindow: 8_192 })), provider }
+              : provider === "openai" ? prepareOpenAIModel(modelTag) : await prepareLocalModel(modelTag, signal);
+            const text = await generateFileReport(input, { root: inventory.root, model, signal, stream: options.stream,
+              onModelCall: () => { modelCalls++; },
+              onResponse: response => modelResponses.push({ modelCall: modelCalls, ...response }),
+              onMessage: message => {
+                agentUsage.inputTokens += message.usage.input;
+                agentUsage.outputTokens += message.usage.output;
+                agentUsage.maxResponseTokens = Math.max(agentUsage.maxResponseTokens, message.usage.output);
+                if (message.content.some(part => part.type === "thinking")) agentUsage.thinkingResponses++;
+              },
+            });
+            source.fileReport = { fingerprint, ...text };
+          } catch (error) {
+            reportFailed = true;
+            errors.push(`File report for ${source.path}: ${errorText(error)}`);
+            if (signal.aborted) break;
+            continue;
+          }
+        }
+        const { abstract, summary } = source.fileReport!;
+        fileReports[source.path] = { abstract, summary };
+      }
+    }
     const files = inventory.sources.map(source => {
-      const { text: _text, ...metadata } = source;
+      const { text: _text, fileReport: _fileReport, ...metadata } = source;
       return { ...metadata, inspection: inspectionCoverage(source) };
     });
-    const incomplete = budgetReached || signal.aborted || errors.length > 0 ||
+    const incomplete = signal.aborted || errors.length > 0 ||
       files.some(source => source.kind !== "symlink" && source.kind !== "directory" && source.inspection !== "full") ||
       files.some(source => source.status === "error");
-    const reasoningPending = failed || rejectedAllFindings || budgetReached || signal.aborted || !inventory.enumerationComplete ||
+    const reasoningPending = failed || rejectedAllFindings || signal.aborted || !inventory.enumerationComplete ||
       inventory.sources.some(source => needsInspection(source));
-    const findings = store.findings();
     store.save(inventory.sources, modelTag, model, reasoningPending, provider);
     return {
       root: inventory.root, observedAt: inventory.observedAt,
-      status: failed && !signal.aborted ? "failed" : incomplete ? "incomplete" : "complete",
+      status: (failed || reportFailed) && !signal.aborted ? "failed" : incomplete ? "incomplete" : "complete",
       cached, reasoningPending, rebuildingKnowledge, analysisRevision: ANALYSIS_REVISION,
       provider, model, limits, processing, durationMs: Date.now() - started, modelCalls, modelResponses, toolCalls, executedToolCalls, agentUsage,
       files, findings, findingWrites, errors, toolErrors,
+      ...(options.generateFileReports ? { fileReports } : {}),
     };
   } finally {
     clearTimeout(timeout);
