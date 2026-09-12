@@ -6,6 +6,8 @@ Run instructions: [benchmark guide](../benchmarks/README.md). Recorded outcomes:
 
 Latest comparison: [current scorecard](../benchmarks/baselines/2026-09-12-quality-fixes/scorecard.md), [review](../benchmarks/baselines/2026-09-12-quality-fixes/review.md), and [implementation/timing findings](implementation.md#core-02-quality-corrections-and-latency-validation). The original fixtures, oracles and grading code were unchanged. All 54 execution/source checks passed; three trials still fail semantic review. None of the 36 reasoning scans timed out, so the five-minute deadline was retained.
 
+Latest scope update: the user asked to finish PDF parsing without spending more time making every quality check green. Document reading and its offline checks are delivered; further text tuning and the full ten-case collection are deferred. The historical scores above remain historical, and no full phase 03 pass is claimed.
+
 ## What we need to measure
 
 Measure whether Foldy produces useful conclusions supported by the right, current evidence. Keep system correctness, semantic quality, and operating cost separate. A large number of findings, valid JSON, or a successful exit is not evidence of good understanding.
@@ -20,7 +22,7 @@ The separation expression in `tests/live/chunk-02.live.ts` also accepts “These
 
 A quality grader must reject both counterexamples. Keep the existing smoke tests while introducing semantic grading; do not relabel their keyword assertions as proof of correctness.
 
-## Six cases using today's supported inputs
+## Six text cases
 
 Each case contains a few synthetic text/Markdown/CSV files, introduced across two scans in fresh processes. The evaluated task is today's generic folder inspection: identify useful facts and supported connections. Do not require reports, tool capabilities, user questions, or actions that core 02 cannot provide.
 
@@ -58,11 +60,11 @@ For numerical claims, compare values with units and currency. Use integer minor 
 
 Prefer a per-case scorecard over one weighted score. Show counts as well as percentages: supported claims `8/9`, required facts `5/6`, false links `1`, successful trials `2/3`. A high average must not conceal a wrong expiry date or a false expense match.
 
-The initial fixed-suite acceptance proposal is: all structural checks pass; zero contradicted critical facts or forbidden links; each case's explicitly required outcomes pass in all three trials. Publish the remaining precision, repetition, usefulness, and cost measurements. Three successful trials are a regression signal, not a statistical guarantee of production reliability.
+Phase 03 tightens the fixed-suite gate: all structural checks pass, every required outcome is present, and zero reviewed final claims are unsupported or contradicted, including uncertainty and noncritical extras. Use `--strict`; the historical non-strict grades remain unchanged. Every case must pass all three trials. Publish the remaining precision, repetition, usefulness, and cost measurements. Three successful trials are a regression signal, not a statistical guarantee of production reliability.
 
 ## Run fairly and diagnose failures
 
-Run three independent trials per case with fresh roots and SQLite state. Within a trial, preserve state across the two staged scans, then run a third unchanged scan to verify caching separately. This is 18 independent trials and up to 54 scan invocations. Cached scans do not count as additional reasoning trials.
+Run three independent trials per case with fresh roots and SQLite state. Within a trial, preserve state across the two staged scans, then run a third unchanged scan to verify caching separately. The text subset is 18 trials / 54 scans. The full phase 03 suite adds four document cases for 30 trials / 90 scans. Cached scans do not count as additional reasoning trials.
 
 Keep inputs identical across those three trials to measure repeatability. In a separate follow-up, change one factor at a time: neutralize folder names, paraphrase text, change file arrival order, add irrelevant documents, or change one critical fact. Update stage-specific expectations when order changes. Final semantic conclusions should remain equivalent under irrelevant changes and should change when the evidence changes.
 
@@ -96,6 +98,16 @@ Trial passes by case: Q01 0/3, Q02 0/3, Q03 0/3, Q04 1/3, Q05 3/3, Q06 2/3. The 
 **Targeted follow-up — Citation guidance.** Clearer previous-inspection labels, source reread locations and contiguous-quote instructions were checked with the unchanged strict cross-file smoke and one trial each of Q05/Q06. All three runs reached cache checks with zero tool errors; 35 offline tests and typechecking pass. Both targeted benchmark trials pass explicit assistant review, but the smoke still turns a room-reservation request into a claim of completion. The full suite was not rerun; its gate remains red. [Retained experiment](../benchmarks/experiments/2026-09-12-citation-guidance/README.md).
 
 **Following slice — Regressions and variations.** Add the controlled input variations and independent confirmation cases. Compare changes against the same baseline, including quality/cost tradeoffs. Automate only grading rules whose meaning is clear. Consider a local model grader only if manual review becomes a bottleneck; calibrate it against human labels, test the counterexamples, and audit disagreements. The model under test must not be the sole authority certifying its own output.
+
+## Phase 03 document evidence
+
+The approved [phase contract](phase-03.md) adds D01–D04 through the same runner. Assets and answers were frozen before document-model tuning; `tests/fixtures/documents/manifest.json` records original hashes. D01 includes JPEG orientation and changed PNG pixels. D02 connects a scanned receipt with a later statement and a near-match. D03 needs a raster figure absent from the PDF text layer. D04 requires all 12 pages and distinguishes a room request from later confirmation.
+
+`npm run bench -- --suite all --out <new-directory> --trials 3` is the final collection. Review each claim and uncertainty against its own cited text or exact retained preview, then run `npm run bench:score -- <new-directory> --strict`. The local model being tested does not grade itself. Missing output earns no pass. New fixes need a new named collection, never selected replacement trials.
+
+The grader enforces required visual/page locators and rejects modified retained assets. Offline calibration checks demonstrate that a text citation cannot earn credit for the chart and the wrong PDF page cannot earn the last-page outcome. They validate review mechanics, not natural-language entailment. Scores separately report recovered tool errors, repetitions, latency, tokens, extraction work and inspection coverage.
+
+Oracle revision 2 corrects Q01 to prototype-review leader, matching its unchanged source. Revision 3 changes the invalid Q06 PNG from unsupported to corrupt once image reading exists; text bytes are unchanged. These explicit revisions prevent treating corrected expectations as a like-for-like comparison with older grades.
 
 ## Reuse the cases as capabilities arrive
 

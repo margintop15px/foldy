@@ -1,0 +1,681 @@
+{
+  "version": 1,
+  "trials": 1,
+  "cases": [
+    {
+      "id": "Q04",
+      "title": "Creative context without shared IDs",
+      "forbidden": [
+        "Make the lighthouse keeper a fearless swimmer or magical character.",
+        "Merge the sci-fi pilot with the lighthouse keeper."
+      ],
+      "stages": [
+        {
+          "expectedStatus": "complete",
+          "files": {
+            "characters/keeper.md": "# The lighthouse story\nNeri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.\n"
+          },
+          "required": [
+            {
+              "id": "character",
+              "description": "Neri is a lighthouse keeper afraid of deep water; her courage is acting despite fear.",
+              "paths": [
+                "characters/keeper.md"
+              ],
+              "kind": "fact"
+            },
+            {
+              "id": "constraint",
+              "description": "The lighthouse story has no magic; Neri solves problems with practical tools.",
+              "paths": [
+                "characters/keeper.md"
+              ],
+              "kind": "fact"
+            }
+          ]
+        },
+        {
+          "expectedStatus": "complete",
+          "files": {
+            "scenes/storm.txt": "Storm scene for the story about the keeper in the character notes.\nThe keeper stays on the quay and uses a rope to help a stranded sailor.\nKeep her fear of deep water visible; the resolution must use practical tools.\n",
+            "other/pilot.md": "# Unrelated science-fiction story\nNeri is a fearless starship pilot who uses telepathy.\nThis belongs to a different story from the lighthouse keeper.\n"
+          },
+          "required": [
+            {
+              "id": "character",
+              "description": "Neri is a lighthouse keeper afraid of deep water; her courage is acting despite fear.",
+              "paths": [
+                "characters/keeper.md"
+              ],
+              "kind": "fact"
+            },
+            {
+              "id": "constraint",
+              "description": "The lighthouse story has no magic; Neri solves problems with practical tools.",
+              "paths": [
+                "characters/keeper.md"
+              ],
+              "kind": "fact"
+            },
+            {
+              "id": "scene-link",
+              "description": "The storm outline explicitly refers to the keeper's character notes and respects her fear/no-magic constraints through quay-and-rope action.",
+              "paths": [
+                "characters/keeper.md",
+                "scenes/storm.txt"
+              ],
+              "kind": "relationship"
+            },
+            {
+              "id": "other-story",
+              "description": "The fearless, telepathic pilot is Neri in a separate science-fiction story.",
+              "paths": [
+                "other/pilot.md"
+              ],
+              "kind": "fact"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scans": [
+    {
+      "key": "Q04/1/1",
+      "caseId": "Q04",
+      "trial": 1,
+      "stage": 1,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-7h1f0Z/root",
+        "observedAt": "2026-09-12T09:43:49.121Z",
+        "status": "complete",
+        "cached": false,
+        "reasoningPending": false,
+        "rebuildingKnowledge": true,
+        "analysisRevision": "10",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 42145,
+        "modelCalls": 4,
+        "toolCalls": 2,
+        "executedToolCalls": 2,
+        "agentUsage": {
+          "inputTokens": 4509,
+          "outputTokens": 996,
+          "maxResponseTokens": 332,
+          "thinkingResponses": 4
+        },
+        "files": [
+          {
+            "path": "characters",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:43:48.725Z",
+            "sourceId": "a31c7fb4-4337-4560-8ceb-81d6e4bf8019",
+            "inspection": "none"
+          },
+          {
+            "path": "characters/keeper.md",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 208
+              }
+            ],
+            "size": 208,
+            "modifiedAt": "2026-09-12T09:43:48.726Z",
+            "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+            "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "60e370be-7f3e-4628-8991-0a3dc6a9ceca",
+            "claim": "Neri is the lighthouse keeper who is afraid of deep water; her courage means acting despite fear rather than losing it; she operates under a constraint of no magic and solves problems with practical tools.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+                "path": "characters/keeper.md",
+                "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+                "quote": "Neri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.",
+                "start": 23,
+                "end": 207,
+                "startLine": 2,
+                "endLine": 4
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 8,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 42558,
+      "traceFile": "Q04-1-1.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    },
+    {
+      "key": "Q04/1/2",
+      "caseId": "Q04",
+      "trial": 1,
+      "stage": 2,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-7h1f0Z/root",
+        "observedAt": "2026-09-12T09:44:32.013Z",
+        "status": "complete",
+        "cached": false,
+        "reasoningPending": false,
+        "rebuildingKnowledge": false,
+        "analysisRevision": "10",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 98276,
+        "modelCalls": 4,
+        "toolCalls": 6,
+        "executedToolCalls": 6,
+        "agentUsage": {
+          "inputTokens": 7680,
+          "outputTokens": 2542,
+          "maxResponseTokens": 976,
+          "thinkingResponses": 4
+        },
+        "files": [
+          {
+            "path": "characters",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:43:48.725Z",
+            "sourceId": "a31c7fb4-4337-4560-8ceb-81d6e4bf8019",
+            "inspection": "none"
+          },
+          {
+            "path": "characters/keeper.md",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 208
+              }
+            ],
+            "size": 208,
+            "modifiedAt": "2026-09-12T09:43:48.726Z",
+            "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+            "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+            "inspection": "full"
+          },
+          {
+            "path": "other",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "sourceId": "e9df9d91-e424-430d-a47d-339e4c205530",
+            "inspection": "none"
+          },
+          {
+            "path": "other/pilot.md",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 150
+              }
+            ],
+            "size": 150,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "version": "3b771e70498b8c535fb1aac1c266970bdb14da3a34c3cf861fdef5aa85a7b0ab",
+            "sourceId": "8c2d5807-1ed3-4631-87e2-c6a6e44405e1",
+            "inspection": "full"
+          },
+          {
+            "path": "scenes",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "sourceId": "d9daef5c-b023-4ad1-96c1-500f1cd71c75",
+            "inspection": "none"
+          },
+          {
+            "path": "scenes/storm.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 217
+              }
+            ],
+            "size": 217,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+            "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "60e370be-7f3e-4628-8991-0a3dc6a9ceca",
+            "claim": "Neri is the lighthouse keeper who is afraid of deep water; her courage means acting despite fear rather than losing it; she operates under a constraint of no magic and solves problems with practical tools.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+                "path": "characters/keeper.md",
+                "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+                "quote": "Neri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.",
+                "start": 23,
+                "end": 207,
+                "startLine": 2,
+                "endLine": 4
+              }
+            ]
+          },
+          {
+            "id": "a6b0207d-bef8-433b-bd2e-f178c32e3d5a",
+            "claim": "Neri is a starship pilot in an unrelated science-fiction story who uses telepathy; this belongs to a different story from the lighthouse keeper.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "8c2d5807-1ed3-4631-87e2-c6a6e44405e1",
+                "path": "other/pilot.md",
+                "version": "3b771e70498b8c535fb1aac1c266970bdb14da3a34c3cf861fdef5aa85a7b0ab",
+                "quote": "# Unrelated science-fiction story\nNeri is a fearless starship pilot who uses telepathy.\nThis belongs to a different story from the lighthouse keeper.",
+                "start": 0,
+                "end": 149,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "f9c970c2-47ab-41ca-b6a9-97ff44ce9ad6",
+            "claim": "The storm scene for the lighthouse keeper story shows the keeper staying on the quay and using a rope to help a stranded sailor; her fear of deep water must remain visible and resolution uses practical tools.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+                "path": "scenes/storm.txt",
+                "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+                "quote": "Storm scene for the story about the keeper in the character notes.\nThe keeper stays on the quay and uses a rope to help a stranded sailor.\nKeep her fear of deep water visible; the resolution must use practical tools.",
+                "start": 0,
+                "end": 216,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "f4f0c9e1-2296-47ce-ba53-8a809bb07658",
+            "claim": "The storm scene (scenes/storm.txt) is for the same lighthouse keeper story described in characters/keeper.md, confirming Neri's fear of deep water and no-magic constraint while adding specific scene details about helping a stranded sailor with a rope from the quay.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+                "path": "scenes/storm.txt",
+                "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+                "quote": "Storm scene for the story about the keeper in the character notes.\nThe keeper stays on the quay and uses a rope to help a stranded sailor.\nKeep her fear of deep water visible; the resolution must use practical tools.",
+                "start": 0,
+                "end": 216,
+                "startLine": 1,
+                "endLine": 3
+              },
+              {
+                "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+                "path": "characters/keeper.md",
+                "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+                "quote": "# The lighthouse story\nNeri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.",
+                "start": 0,
+                "end": 207,
+                "startLine": 1,
+                "endLine": 4
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 8,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 99017,
+      "traceFile": "Q04-1-2.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    },
+    {
+      "key": "Q04/1/3",
+      "caseId": "Q04",
+      "trial": 1,
+      "stage": 3,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-7h1f0Z/root",
+        "observedAt": "2026-09-12T09:46:11.150Z",
+        "status": "complete",
+        "cached": true,
+        "reasoningPending": false,
+        "rebuildingKnowledge": false,
+        "analysisRevision": "10",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 12,
+        "modelCalls": 0,
+        "toolCalls": 0,
+        "executedToolCalls": 0,
+        "agentUsage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "maxResponseTokens": 0,
+          "thinkingResponses": 0
+        },
+        "files": [
+          {
+            "path": "characters",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:43:48.725Z",
+            "sourceId": "a31c7fb4-4337-4560-8ceb-81d6e4bf8019",
+            "inspection": "none"
+          },
+          {
+            "path": "characters/keeper.md",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 208
+              }
+            ],
+            "size": 208,
+            "modifiedAt": "2026-09-12T09:43:48.726Z",
+            "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+            "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+            "inspection": "full"
+          },
+          {
+            "path": "other",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "sourceId": "e9df9d91-e424-430d-a47d-339e4c205530",
+            "inspection": "none"
+          },
+          {
+            "path": "other/pilot.md",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 150
+              }
+            ],
+            "size": 150,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "version": "3b771e70498b8c535fb1aac1c266970bdb14da3a34c3cf861fdef5aa85a7b0ab",
+            "sourceId": "8c2d5807-1ed3-4631-87e2-c6a6e44405e1",
+            "inspection": "full"
+          },
+          {
+            "path": "scenes",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "sourceId": "d9daef5c-b023-4ad1-96c1-500f1cd71c75",
+            "inspection": "none"
+          },
+          {
+            "path": "scenes/storm.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 217
+              }
+            ],
+            "size": 217,
+            "modifiedAt": "2026-09-12T09:44:31.288Z",
+            "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+            "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "60e370be-7f3e-4628-8991-0a3dc6a9ceca",
+            "claim": "Neri is the lighthouse keeper who is afraid of deep water; her courage means acting despite fear rather than losing it; she operates under a constraint of no magic and solves problems with practical tools.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+                "path": "characters/keeper.md",
+                "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+                "quote": "Neri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.",
+                "start": 23,
+                "end": 207,
+                "startLine": 2,
+                "endLine": 4
+              }
+            ]
+          },
+          {
+            "id": "a6b0207d-bef8-433b-bd2e-f178c32e3d5a",
+            "claim": "Neri is a starship pilot in an unrelated science-fiction story who uses telepathy; this belongs to a different story from the lighthouse keeper.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "8c2d5807-1ed3-4631-87e2-c6a6e44405e1",
+                "path": "other/pilot.md",
+                "version": "3b771e70498b8c535fb1aac1c266970bdb14da3a34c3cf861fdef5aa85a7b0ab",
+                "quote": "# Unrelated science-fiction story\nNeri is a fearless starship pilot who uses telepathy.\nThis belongs to a different story from the lighthouse keeper.",
+                "start": 0,
+                "end": 149,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "f9c970c2-47ab-41ca-b6a9-97ff44ce9ad6",
+            "claim": "The storm scene for the lighthouse keeper story shows the keeper staying on the quay and using a rope to help a stranded sailor; her fear of deep water must remain visible and resolution uses practical tools.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+                "path": "scenes/storm.txt",
+                "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+                "quote": "Storm scene for the story about the keeper in the character notes.\nThe keeper stays on the quay and uses a rope to help a stranded sailor.\nKeep her fear of deep water visible; the resolution must use practical tools.",
+                "start": 0,
+                "end": 216,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "f4f0c9e1-2296-47ce-ba53-8a809bb07658",
+            "claim": "The storm scene (scenes/storm.txt) is for the same lighthouse keeper story described in characters/keeper.md, confirming Neri's fear of deep water and no-magic constraint while adding specific scene details about helping a stranded sailor with a rope from the quay.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "de623e72-3a96-4141-9920-ab53bf389b5c",
+                "path": "scenes/storm.txt",
+                "version": "113b108f2d26559a029384504ccc275c433e7535065605da47b15659b59ee855",
+                "quote": "Storm scene for the story about the keeper in the character notes.\nThe keeper stays on the quay and uses a rope to help a stranded sailor.\nKeep her fear of deep water visible; the resolution must use practical tools.",
+                "start": 0,
+                "end": 216,
+                "startLine": 1,
+                "endLine": 3
+              },
+              {
+                "sourceId": "3efa9fdd-69be-4c0b-8882-b4e23b61f3a6",
+                "path": "characters/keeper.md",
+                "version": "bbecb8919f054a8b7ba12a4d6798a418a13cec579aa86eb3e95f546b0504cc52",
+                "quote": "# The lighthouse story\nNeri is the lighthouse keeper. She is afraid of deep water.\nHer courage means acting despite fear, not losing that fear.\nConstraint: no magic. She solves problems with practical tools.",
+                "start": 0,
+                "end": 207,
+                "startLine": 1,
+                "endLine": 4
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 859,
+      "traceFile": "Q04-1-3.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    }
+  ],
+  "finished": true,
+  "manifest": {
+    "startedAt": "2026-09-12T09:43:48.697Z",
+    "command": [
+      "/Users/usuario/Projects/foldy/tests/quality/run.ts",
+      "--case",
+      "Q04",
+      "--out",
+      "benchmarks/experiments/2026-09-12-phase03a-text/run-03-q04",
+      "--trials",
+      "1"
+    ],
+    "commit": "70783de66cf30ccb829ed4620d6cf19e812d0800",
+    "gitStatus": " M src/model.ts\n M src/scan.ts\n M src/store.ts\n M tests/chunk-02.test.ts\n M tests/quality.test.ts\n M tests/quality/cases.ts\n M tests/quality/score.ts\n?? benchmarks/experiments/2026-09-12-phase03a-text/\n?? specs/phase-03.md\n?? tests/fixtures/documents/",
+    "patchHash": "ca7a7ce789ada66545825e11ea32fcd832176490b1d11fe01080e4238f7198f7",
+    "codeFiles": {
+      "package-lock.json": "4e427e4f4ed3bdc64d29a07f2e024524c446d5914c525207c9296dcf3294c10a",
+      "package.json": "675b89fb5f04790df8b24b06082fda044ffe8cd65217d8660e9021f8f15ec99e",
+      "src/cli.ts": "f6b6430ebb619416346e70c2cd08a384fce7370a2ecb4294b0aa22cd56f6735b",
+      "src/inventory.ts": "c4dad8389abda42c6b7568132958d9791411bf7c06218225984af45033bcfbfe",
+      "src/model.ts": "07ea0659be0c089293642342a3c548ef5e635cb96ba32fa4925a4432d30bafd1",
+      "src/scan.ts": "00ba00e84f3868050daa6bf56d28ec76152236fad9b05ffde93b7eee24d837e1",
+      "src/store.ts": "bd97663bd7b6938762abc52e632fa56ec674b543dab2ecb01bf8ec46196dc7da",
+      "tests/helpers.ts": "c45b5dc3022e1c0de0da949e228d17dab4bad1156efa4c6f2433c86675da86ec",
+      "tests/quality.test.ts": "7c8e699485fedcf3100cb26b6023db82dcbea513aa4353968685b0daf07fcd4a",
+      "tests/quality/cases.ts": "a2f08c167497ddc7b967db1d27c46ca86c1227320fb9565d11ec491fe4138417",
+      "tests/quality/harness.ts": "cc51777ebfe154ece207bd018f4b3347c39e21b3656d68c142ad0ab17b33c473",
+      "tests/quality/run.ts": "8196c6f4d8d45edd29c17c0893e11e32d31d9081d67c81e22ef22dd09401018d",
+      "tests/quality/scan-process.ts": "04fd1ad838987f0040ff8eae30686baa3858b1cb4bbf303fdd162de7f9d25115",
+      "tests/quality/score.ts": "a2b0b92486b1cfb033d703eb6b7cea304fa3381f2c6c2a81490b0c5c1f8f4f5e",
+      "tsconfig.json": "71b56d916cfbcc560b353e39c3ca2ae48f23a94716067ac35b46b99eb829e723"
+    },
+    "casesHash": "fc011f54d7ee9845ea0bbb769b598131878a7b49e07df91a4f4ca798c27cfc2f",
+    "promptHash": "da9052d902944709428df8514f48af38fdd8c10b04e36bce2779b0db70cb3147",
+    "modelTag": "qwen3.5:9b",
+    "modelBefore": {
+      "models": [
+        {
+          "name": "qwen3.5:9b",
+          "model": "qwen3.5:9b",
+          "size": 5940130609,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen35",
+            "families": [
+              "qwen35"
+            ],
+            "parameter_size": "9.7B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2026-09-12T11:47:04.367138+02:00",
+          "size_vram": 5940130609,
+          "context_length": 16384
+        }
+      ]
+    },
+    "node": "v24.19.0",
+    "sqlite": "3.53.3",
+    "hardware": {
+      "platform": "darwin",
+      "release": "25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M4 Pro",
+      "memoryBytes": 25769803776
+    },
+    "settings": {
+      "temperature": 0,
+      "maxOutputTokens": 2048,
+      "maxTokensField": "max_tokens",
+      "reasoningEffort": "low when supported; per-scan model records the selected mode",
+      "retries": 0,
+      "maxToolCalls": 20,
+      "maxRunMs": 300000,
+      "compaction": {
+        "reserveTokens": 2048,
+        "keepRecentTokens": 2048
+      }
+    },
+    "protocol": "Fresh process per scan; fresh root/state per trial; two stages then unchanged cache probe with network denied. Serial, no retries. Tool traces exclude model reasoning. Per-scan model metadata records actual runtime/digest/context.",
+    "finishedAt": "2026-09-12T09:46:11.173Z"
+  }
+}

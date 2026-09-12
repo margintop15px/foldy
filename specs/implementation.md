@@ -1,6 +1,6 @@
 # Foldy v1 implementation chunks
 
-Status: chunks 01–02 are implemented and verified. Chunks 03–09 and Telegram T01–T02 remain unimplemented; their commands are target development interfaces. The Telegram specification is complete as a design deliverable, not as runtime evidence.
+Status: chunks 01–02 are implemented. Phase 03 is in progress under its stricter semantic gate. Chunks 04–09 and Telegram T01–T02 remain unimplemented; their commands are target development interfaces. The Telegram specification is complete as a design deliverable, not as runtime evidence.
 
 Read [the behavioral specification](foldy-v1.md) before executing a chunk. [README](README.md) holds accepted decisions and progress.
 
@@ -171,23 +171,45 @@ The smoke still exposes a semantic error: the model says room Cedar **is reserve
 
 ## 03 — Understand images and PDFs
 
-**Prerequisite:** 02. **Requirements:** OBS-01/02/05/06, CTX-01/03. **Scenarios:** A05, A06, A20.
+**Prerequisite:** 02. **Requirements:** OBS-01/02/05/06, CTX-01/03, RUN-02. **Scenarios:** A01–A06, A08/A09, A20 and document benchmark D01–D04.
 
-**Outcome:** the existing scan handles images, text PDFs, and scanned PDFs with traceable evidence.
+**Status: document reader implemented; the full phase 03 semantic gate remains open.** On 2026-09-12 the user asked to finish PDF parsing promptly and stop spending time on making every quality check green. Further text tuning and the 30-trial gate are deferred; their passing results are not implied. The approved [phase contract](phase-03.md) splits this work into 03a text quality, 03b images, 03c PDF pages, and 03d full validation. KISS remains one local model, one SQLite database and the same three tools.
 
-Add trusted extraction code: extract PDF text where present and render pages when visual content needs inspection, including pages that already have a text layer. Pass image pixels through the local model's vision input to understand objects, scenes, and relationships as well as text. Reuse extracted content by source version. Record page/excerpt/image locations and actual inspection coverage. Fail individual documents clearly while continuing the batch. A text-only model must report unavailable vision.
+`read_file(path, offset?, page?)` preserves 4,000-character text reads. PNG/JPEG reads return oriented, bounded pixels and a session-local visual reference. PDF reads return one-based page metadata, text plus page pixels, and separate text/visual coverage. A text layer does not replace visual inspection. Text-only models report unavailable vision and continue eligible text work.
 
-Use established parsing/rendering libraries; keep their use behind simple functions. Before accepting a dependency, verify its license permits the intended distribution and that its local path does not call a hosted service. Add configurable operational bounds only where the chosen extractor needs them to prevent resource exhaustion, with the actual values recorded in live-check evidence.
+Exact text citations require a current-session read and a page for PDFs. Visual citations require a reference whose pixels reached a successful model turn; successful compaction clears eligibility. A model-read receipt field is a visual observation, not verified extracted text. `record_finding` can explicitly supersede a model finding with `replacesFindingId` after normal validation; its previous row remains historical.
 
-**Run:** `npm run foldy -- scan ./tests/fixtures/documents`
+One fixed helper process uses `pdfjs-dist@6.3.289` (Apache-2.0), `@napi-rs/canvas@1.0.9` (MIT), and `sharp@0.35.4` (Apache-2.0), verified from the installed package metadata. It processes one file/page at a time using in-memory input bytes and package-local PDF resources. It does not follow document URLs, run PDF scripts, or extract attachments. No processor registry, OCR service or second model is introduced.
 
-**Verify:** `npm test -- tests/chunk-03.test.ts` and `npm run typecheck`.
+Limits: image input 20 MiB / 64 million pixels; PDF input 50 MiB; preview longest edge 2,000 pixels and encoded payload 4.5 MiB; extracted text 64 KiB per page. Reductions, warnings and truncation remain explicit. The helper has a 30-second deadline within the scan budget, and is killed/reaped on cancellation. Its V8 heap cap and native image bounds are not an OS sandbox or a hard limit on total RSS. PDF text is capped after bounded-process extraction; a pathological page can fail before producing an excerpt.
 
-**Live check:** `npm run test:live -- tests/live/chunk-03.live.ts`. Inspect a text PDF, a scanned receipt, an image with no readable text, and a PDF page containing text plus a meaningful figure. Use neutral filenames and fixed visible facts in a test-only manifest so success requires pixel inspection. Verify correct image/page evidence and visible facts. OCR alone, a vision-capable model tag, or a filename-based guess does not pass.
+Schema 3 transactionally adds binary snapshots and shared derived-page caches while preserving identities, older versions, text evidence and finding history. Cache keys include original fingerprint, extractor revision, input format and page; inspection remains source-specific for identical copies. Sources are rechecked after extraction and before accepting document evidence. Current text and visual findings remain searchable with visible incomplete coverage. A completed unchanged scan does zero model calls and zero extraction/rendering. Stable corrupt/encrypted inputs do not repeatedly trigger inference; transient failures/cancellation preserve pending work.
 
-**Stop:** these formats use the existing knowledge path. Spreadsheet output, image generation, and arbitrary script execution remain deferred.
+Text runs retain five minutes / 20 calls. Document runs allow 15 minutes / 80 calls. One completeness/evidence review uses a fresh Pi context with the same model and the original counter/deadline. This replaces the earlier same-context completeness pass after repeated under-cited findings survived that pass. It is an aid, not a semantic proof; independent benchmark review remains the quality gate.
 
-Evidence: pending.
+**Run:** `npm run foldy -- scan /path/to/documents`. Put only input documents in that folder. The fixture asset directory also contains the benchmark oracle and builder, so it is not a scan root.
+
+**Broader phase gate (deferred; not a passing result):**
+
+```sh
+npm test
+npm run typecheck
+npm run test:live -- tests/live/chunk-0{1,2,3}.live.ts
+npm run bench -- --suite all --out <new-directory> --trials 3
+npm run bench:score -- <new-directory> --strict
+```
+
+The existing text suite remains the default; `--suite documents` runs four new cases. The full suite is 30 trials / 90 scans. Original assets and expected answers are frozen before model tuning, and the runner retains exact previews. Every final claim and uncertainty is reviewed against its own cited text/pixels. Strict scoring requires all required outcomes and zero unsupported final claims. Historical grades and unsuccessful runs remain intact; fixes require a new named collection.
+
+**Reader validation (2026-09-12):** `npm ci --ignore-scripts --offline --cache /tmp/foldy-phase03-npm-cache` installed the locked dependencies. `npm test` passed **57/57 tests** in 17.032 seconds in the project workspace; `npm run typecheck` and `git diff --check` passed. Model access is replaced in offline tests, and source trees remain unchanged. The tests cover actual serialized image requests, EXIF orientation, size/payload limits, real PDF rendering/text continuation, page/visual citation guards, compaction, corruption/encryption, cancellation, source replacement and symlink substitution, migration, distinct copy identities, fresh-process 12-page retrieval, and cached scans with no extraction. Passing those checks does not establish local-model visual quality. A focused live check of the frozen mixed PDF is retained under `benchmarks/experiments/2026-09-12-pdf-reader/`; its result is recorded below.
+
+**Focused live PDF result:** the frozen mixed PDF's text and pixels were inspected, with one extraction/render job taking **365 ms**. The model correctly read the chart values **35 / 72 / 48 C** and compared them with the text's 60 C limit. Source bytes were unchanged. The scan nevertheless ended **failed/incomplete** after **162.645 seconds** because a response reached the 2,048-token cap; it did not reach the driver's shortened three-minute deadline. Two missing-page citation attempts were rejected. One final finding lacked visual support for day labels, and another included unsupported uncertainty about an intended compliance assessment. The completed live cache stage was therefore not run. [Exact pixels, report, commands and independent evidence review](../benchmarks/experiments/2026-09-12-pdf-reader/README.md) are retained without retry. Parsing is implemented; these reasoning-quality failures remain open.
+
+**Response budget update (2026-09-12):** at the user's request, the response ceiling is now **8,192 tokens**, raised from 2,048, for both text and document runs. It is capped at half the model's effective context: 8,192 for the evaluated 16,384-token setup, or 4,096 for an 8,192-token context. Pi can lower an individual request further for its estimated remaining context. Compaction reserves the configured output allowance and retains Pi's smaller summary limits. The five-minute text / 15-minute document deadlines remain unchanged. This is a generation bound, not a billing constraint; [Ollama documents an unlimited generation option](https://docs.ollama.com/modelfile#valid-parameters-and-values). Completed cached findings do not need invalidation for a higher ceiling; unfinished work already triggers another scan. `npm test` passed **57/57** in **16.203 seconds**; typecheck and diff checks passed. Request-level tests cover the increased serialized `max_tokens`, smaller contexts, vision transport and compaction. The earlier failed live result remains unchanged; the increased ceiling has not been evaluated in another live benchmark.
+
+The earlier text attempts remain under `benchmarks/experiments/2026-09-12-phase03a-text/`. A targeted Q04 trial passed strict review; later full attempts were stopped for a text deadline failure, a recorded low-power sleep, and then the user's change in priority. None is presented as a passing full suite. `run-08-review-changes` was cancelled after two scan attempts. The prepared D01–D04 benchmark and strict scorer remain runnable, but the 90-scan collection and full live regression commands were not run for this reader delivery.
+
+**Full phase exit (deferred):** these formats use the existing knowledge path and all required checks pass. The current delivery stops at the implemented reader with the validation and limitations above. Spreadsheets, watching, user corrections, generated files and external actions remain deferred.
 
 ## 04 — Read spreadsheets
 

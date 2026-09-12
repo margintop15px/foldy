@@ -1,6 +1,6 @@
 # Foldy
 
-Status: chunks 01–02 are implemented and verified. Chunks 03–09 remain unimplemented. Telegram T01–T02 are specified but unimplemented. See [setup and run commands](../README.md).
+Status: chunks 01–02 are implemented. Phase 03 is in progress; its strict semantic quality gate is not yet complete. Chunks 04–09 remain unimplemented. Telegram T01–T02 are specified but unimplemented. See [setup and run commands](../README.md).
 
 ## Purpose
 
@@ -28,7 +28,7 @@ For a proposed addition, ask: which current requirement or failing test needs th
 - [Behavioral specification](foldy-v1.md): authoritative v1 behavior, boundaries, interfaces, and acceptance scenarios.
 - [Messaging specification — Telegram first](telegram-v1.md): CopilotKit Channels foundation, personal-chat results, generated attachments, clarification choices, feedback, settings, and acceptance scenarios.
 - [Implementation chunks](implementation.md): ordered, independently verifiable work with run commands and completion evidence.
-- [Output quality evaluation](quality-evaluation.md): executable six-case benchmark, scoring rules, and the recorded 54-scan baseline; the quality gate is not yet met.
+- [Output quality evaluation](quality-evaluation.md): text/document benchmarks, strict scoring rules, and historical baselines; phase 03 requires 30 trials / 90 scans with every required outcome and every reviewed claim supported.
 
 Here, **executable specification** means an engineer or agent can implement a chunk and check its result against explicit scenarios. Markdown is the source of intent. The implementation supplies the runnable commands and tests; there is no custom specification parser or test DSL.
 
@@ -66,13 +66,13 @@ Keep one model per run. A text-only candidate is eligible for text experiments; 
 
 ## Progress
 
-Commands for chunks 01–02 are runnable. Later commands remain target interfaces until their owning chunk is implemented.
+Commands for chunks 01–03 are runnable. Later commands remain target interfaces until their owning chunk is implemented.
 
 | Chunk | Outcome | Status |
 | --- | --- | --- |
 | 01 | Read a folder | Complete; offline checks and live Qwen check pass |
 | 02 | Remember and connect | Complete; persistence, offline checks, and live cross-session Qwen check pass |
-| 03 | Understand images and PDFs | Not started |
+| 03 | Understand images and PDFs | Reader implemented; broader semantic quality gate deferred at user request |
 | 04 | Read spreadsheets | Not started |
 | 05 | React to changes | Not started |
 | 06 | Explain and accept corrections | Not started |

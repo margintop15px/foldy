@@ -1,0 +1,165 @@
+{
+  "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-pdf-smoke-jL9Djl/root",
+  "observedAt": "2026-09-12T11:16:12.925Z",
+  "status": "failed",
+  "cached": false,
+  "reasoningPending": true,
+  "rebuildingKnowledge": true,
+  "analysisRevision": "15",
+  "model": {
+    "name": "qwen3.5:9b",
+    "contextWindow": 16384,
+    "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+    "ollamaVersion": "0.34.0",
+    "loadedBytes": 6031262349,
+    "capabilities": [
+      "completion",
+      "vision",
+      "tools",
+      "thinking"
+    ],
+    "reasoningEffort": "low"
+  },
+  "limits": {
+    "maxRunMs": 180000,
+    "maxToolCalls": 80
+  },
+  "processing": {
+    "jobs": 1,
+    "cacheHits": 1,
+    "decodedImages": 0,
+    "renderedPages": 1,
+    "extractionMs": 365
+  },
+  "durationMs": 162645,
+  "modelCalls": 7,
+  "toolCalls": 7,
+  "executedToolCalls": 7,
+  "agentUsage": {
+    "inputTokens": 11475,
+    "outputTokens": 3919,
+    "maxResponseTokens": 2048,
+    "thinkingResponses": 7
+  },
+  "files": [
+    {
+      "path": "a.pdf",
+      "kind": "file",
+      "status": "ready",
+      "inspected": [],
+      "size": 25469,
+      "modifiedAt": "2026-09-12T11:16:12.922Z",
+      "format": "pdf",
+      "version": "7c66d99a79a8b5194f6cfd78622a043b5645d91d848f1acf9e577fafc3855a87",
+      "sourceId": "30dfaa59-c615-4d5a-bfd0-c782c71d1d76",
+      "document": {
+        "revision": "1",
+        "pages": {
+          "1": {
+            "textLength": 94,
+            "textTruncated": false,
+            "inspected": [
+              {
+                "start": 0,
+                "end": 94
+              }
+            ],
+            "visualPartial": false,
+            "reduced": false,
+            "warnings": [],
+            "originalWidth": 600,
+            "originalHeight": 760,
+            "visual": {
+              "hash": "cc894044eb85216e350a5bb07e127c2b3f6cb4ab030f22454715c572e30112ec",
+              "width": 1200,
+              "height": 1520,
+              "mimeType": "image/png"
+            }
+          }
+        },
+        "visualUnavailable": false,
+        "pageCount": 1
+      },
+      "inspection": "full"
+    }
+  ],
+  "findings": [
+    {
+      "id": "c2645663-9c3c-4f06-acd2-9fc87a802f39",
+      "claim": "Sensor trial ST-204 has a temperature limit of at most 60 C, and the chart shows daily peak temperature for Mon, Tue, Wed.",
+      "kind": "observed",
+      "evidence": [
+        {
+          "sourceId": "30dfaa59-c615-4d5a-bfd0-c782c71d1d76",
+          "path": "a.pdf",
+          "version": "7c66d99a79a8b5194f6cfd78622a043b5645d91d848f1acf9e577fafc3855a87",
+          "quote": "Sensor trial ST-204 \nTemperature limit: at most 60 C.\nThe chart shows daily peak temperature.",
+          "start": 0,
+          "end": 93,
+          "startLine": 1,
+          "endLine": 3,
+          "page": 1
+        }
+      ]
+    },
+    {
+      "id": "dec2cd00-dd68-4cd9-926a-12889b3368bf",
+      "claim": "Daily peak temperatures recorded in Sensor trial ST-204: Monday 35 C, Tuesday 72 C, Wednesday 48 C.",
+      "kind": "observed",
+      "evidence": [
+        {
+          "type": "visual",
+          "sourceId": "30dfaa59-c615-4d5a-bfd0-c782c71d1d76",
+          "path": "a.pdf",
+          "version": "7c66d99a79a8b5194f6cfd78622a043b5645d91d848f1acf9e577fafc3855a87",
+          "page": 1,
+          "preview": {
+            "hash": "cc894044eb85216e350a5bb07e127c2b3f6cb4ab030f22454715c572e30112ec",
+            "width": 1200,
+            "height": 1520,
+            "mimeType": "image/png"
+          }
+        }
+      ]
+    },
+    {
+      "id": "c51baa57-408b-4dc1-9a48-de12cdda7a83",
+      "claim": "Tuesday's peak temperature of 72 C exceeded the 60 C limit for Sensor trial ST-204, while Monday (35 C) and Wednesday (48 C) remained within limits.",
+      "kind": "inferred",
+      "uncertainty": "The inference that Tuesday exceeded the limit is based on comparing the visual bar chart value (72 C) to the stated temperature limit (at most 60 C). The uncertainty is whether this comparison accurately reflects the intended compliance assessment.",
+      "evidence": [
+        {
+          "sourceId": "30dfaa59-c615-4d5a-bfd0-c782c71d1d76",
+          "path": "a.pdf",
+          "version": "7c66d99a79a8b5194f6cfd78622a043b5645d91d848f1acf9e577fafc3855a87",
+          "quote": "Temperature limit: at most 60 C.",
+          "start": 21,
+          "end": 53,
+          "startLine": 2,
+          "endLine": 2,
+          "page": 1
+        },
+        {
+          "type": "visual",
+          "sourceId": "30dfaa59-c615-4d5a-bfd0-c782c71d1d76",
+          "path": "a.pdf",
+          "version": "7c66d99a79a8b5194f6cfd78622a043b5645d91d848f1acf9e577fafc3855a87",
+          "page": 1,
+          "preview": {
+            "hash": "cc894044eb85216e350a5bb07e127c2b3f6cb4ab030f22454715c572e30112ec",
+            "width": 1200,
+            "height": 1520,
+            "mimeType": "image/png"
+          }
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "The model reached its response token limit; work may be incomplete."
+  ],
+  "toolErrors": [
+    "record_finding: PDF evidence needs a one-based page number.",
+    "record_finding: PDF evidence needs a one-based page number."
+  ]
+}

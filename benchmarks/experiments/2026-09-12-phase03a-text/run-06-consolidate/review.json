@@ -1,0 +1,80 @@
+{
+  "reviewer": "Codex assistant, independent of the tested local model; manual claim and citation review, human calibration pending.",
+  "resultsHash": "814afa09daa3f3acd97f2b38a2b60a90ed7b3abd9c6e2eb00df598ad43ef3e44",
+  "stages": {
+    "Q04/1/1": {
+      "reportHash": "9b98cc0d8d279b34f59f495dd792592886510e2ef7696f4e9f7fa44762960785",
+      "claims": [
+        {
+          "text": "Neri is the lighthouse keeper, afraid of deep water; courage means acting despite fear. She uses practical tools without magic.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "character",
+            "constraint"
+          ],
+          "reason": "The quoted character lines explicitly state each trait and constraint."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All required character facts are supported."
+    },
+    "Q04/1/2": {
+      "reportHash": "99095f88e40077ed1631539c909650bcf67cae9e21f64c4cadce83c63c53682c",
+      "claims": [
+        {
+          "text": "Neri is the lighthouse keeper, afraid of deep water; courage means acting despite fear. She uses practical tools without magic.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "character",
+            "constraint"
+          ],
+          "reason": "The quoted character lines explicitly state each trait and constraint."
+        },
+        {
+          "text": "The fearless telepathic starship pilot Neri belongs to a different science-fiction story.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "other-story"
+          ],
+          "reason": "The finding cites the pilot description and its explicit different-story statement."
+        },
+        {
+          "text": "The storm outline describes the keeper staying on the quay and helping a sailor with a rope; it calls for visible fear and a practical resolution.",
+          "findings": [
+            3
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "All scene details and intended constraints occur in the cited scene excerpt; no unsupported character name or lighthouse role is imported."
+        },
+        {
+          "text": "The storm outline connects to the lighthouse keeper notes through quay-and-rope action that preserves her fear and practical-tool constraints.",
+          "findings": [
+            4
+          ],
+          "label": "supported",
+          "kind": "relationship",
+          "covers": [
+            "scene-link"
+          ],
+          "reason": "Both the scene and character excerpts are cited, including the explicit reference to the keeper notes, the quay and rope, fear, and no-magic/practical constraints. Staying on the quay supports the parenthetical not in deep water."
+        }
+      ],
+      "usefulness": 2,
+      "notes": "All outcomes are supported with complete joint citations. The separate scene summary repeats part of the joint finding; it is redundant but no longer under-cited."
+    }
+  }
+}

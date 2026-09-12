@@ -51,6 +51,7 @@ test("A03/A04 live: two batches connect across fresh local-model processes, with
     if (festival && project) assert.match(finding.claim, /separate|distinct|different|unrelated|not (?:the same|related|connected)/i,
       "A finding citing the festival alongside the project must distinguish them, not assert equivalence.");
     for (const evidence of finding.evidence) {
+      assert.ok(evidence.type !== "visual");
       const bytes = await readFile(join(root, evidence.path));
       assert.equal(evidence.version, createHash("sha256").update(bytes).digest("hex"));
       assert.equal(bytes.toString("utf8").slice(evidence.start, evidence.end), evidence.quote);

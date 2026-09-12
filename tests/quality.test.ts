@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
-import { writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
 import { scan } from "../src/scan.ts";
-import { call, fixture, read, scripted } from "./helpers.ts";
+import { call, fixture, read, scripted, toolResult } from "./helpers.ts";
 import { cases, sourcesAt, type Case } from "./quality/cases.ts";
-import { checkScan, hash, runProcess, type Results, type ScanResult } from "./quality/harness.ts";
-import { grade, scorecard, type Review, type StageReview } from "./quality/score.ts";
+import { checkScan, hash, runProcess, type Inspection, type Results, type ScanResult } from "./quality/harness.ts";
+import { grade, scorecard, verifyRetainedAssets, type Review, type StageReview } from "./quality/score.ts";
+import { documentCases } from "./quality/documents.ts";
 
 const content = "Project Elm budget is EUR 240.\nProject Oak is a separate project.\n";
 const stage: Case["stages"][0] = {
@@ -34,6 +35,68 @@ function reviewOf(results: Results, attempt: ScanResult, change: Partial<StageRe
       claims: [{ text: "Elm budget is EUR 240.", findings: [1], label: "supported", kind: "fact", covers: ["budget"], reason: "Correct entity, currency and value, present in the cited source." }], ...change },
   } };
 }
+
+test("Quality strict gate rejects noncritical unsupported extras, including uncertainty", async t => {
+  const { results, attempt } = await sample(t);
+  const review = reviewOf(results, attempt);
+  review.stages[attempt.key]!.claims.push({ text: "The budget might have been reduced due to delays.", findings: [1],
+    label: "insufficient", kind: "uncertainty", covers: [], reason: "The cited source gives no earlier budget or cause." });
+  assert.equal(grade(results, attempt, review).status, "passed", "Preserve the historical grading contract.");
+  assert.equal(grade(results, attempt, review, true).status, "failed");
+  assert.match(scorecard(results, review, true), /STRICT/);
+  review.stages[attempt.key]!.claims.pop();
+  results.manifest.codeChangesDuringRun = ["src/model.ts"];
+  review.resultsHash = hash(results);
+  assert.equal(grade(results, attempt, review, true).status, "failed");
+  assert.match(scorecard(results, review, true), /INVALID COLLECTION/);
+});
+
+test("Quality: document grades require the right page and visual evidence, and retained pixels cannot change", async t => {
+  const { directory, root, stateDir } = await fixture(t);
+  const input = await readFile(new URL("./fixtures/documents/mixed.pdf", import.meta.url));
+  await writeFile(join(root, "a.pdf"), input);
+  await mkdir(join(directory, "assets"));
+  await mkdir(join(directory, "previews"));
+  await writeFile(join(directory, "assets/mixed.pdf"), input);
+  const inspections: Inspection[] = [];
+  let previewBytes: Buffer | undefined;
+  const report = await scan(root, { stateDir, onToolEvent: event => {
+    if (event.type !== "tool_execution_end" || event.toolName !== "read_file" || event.isError) return;
+    const result = event.result as { content: { type: string; text?: string; data?: string }[] };
+    const metadata = JSON.parse(result.content.find(block => block.type === "text")!.text!);
+    previewBytes = Buffer.from(result.content.find(block => block.type === "image")!.data!, "base64");
+    inspections.push({ ...metadata, previewFile: `previews/${metadata.preview.hash}.png` });
+  }, stream: scripted((context, turn) => turn === 0 ? [read("a.pdf")]
+    : turn === 1 ? [call("record_finding", { claim: "The chart shows Tuesday 72 C, above the stated 60 C limit.", kind: "observed",
+      evidence: [{ path: "a.pdf", page: 1, visualRef: toolResult(context, "read_file").visualRef },
+        { path: "a.pdf", page: 1, quote: "Temperature limit: at most 60 C." }] })] : []) });
+  await writeFile(join(directory, inspections[0]!.previewFile!), previewBytes!);
+  const documentStage: Case["stages"][0] = { files: { "a.pdf": { asset: "mixed.pdf", sha256: hash(input) } }, expectedStatus: "complete",
+    required: [{ id: "chart", kind: "fact", description: "Tuesday exceeds the limit.", paths: ["a.pdf"], locators: [{ path: "a.pdf", page: 1, visual: true }] }] };
+  const item: Case = { id: "DOC", title: "Document grader calibration", forbidden: [], stages: [documentStage, documentStage] };
+  const attempt: ScanResult = { key: "DOC/1/1", caseId: "DOC", trial: 1, stage: 1, report, inspections, networkRequests: 1,
+    exitCode: 0, wallMs: 100, stderr: "", sourceBytesUnchanged: true, issues: [], traceFile: "unused.jsonl" };
+  const results: Results = { version: 1, manifest: {}, cases: [item], trials: 1, scans: [attempt], finished: false };
+  const review = (): Review => ({ resultsHash: hash(results), reviewer: "Offline calibration, manually authored labels.", stages: {
+    [attempt.key]: { reportHash: hash(attempt.report), usefulness: 2, notes: "The chart and stated limit support the comparison.",
+      claims: [{ text: report.findings[0]!.claim, findings: [1], label: "supported", kind: "fact", covers: ["chart"], reason: "Visible Tuesday 72 exceeds the stated 60 limit." }] },
+  } });
+  assert.deepEqual(checkScan(item, attempt), []);
+  assert.equal(grade(results, attempt, review(), true).status, "passed");
+  const wrongPage = structuredClone(attempt);
+  wrongPage.report!.findings[0]!.evidence[0]!.page = 2;
+  assert.ok(checkScan(item, wrongPage).some(issue => issue.includes("Invalid/stale")));
+  documentStage.required[0]!.locators![0]!.page = 2;
+  assert.throws(() => grade(results, attempt, review(), true), /page\/visual evidence missing/);
+  documentStage.required[0]!.locators![0]!.page = 1;
+  const saved = report.findings[0]!.evidence;
+  report.findings[0]!.evidence = saved.filter(ref => ref.type !== "visual");
+  assert.throws(() => grade(results, attempt, review(), true), /page\/visual evidence missing/);
+  report.findings[0]!.evidence = saved;
+  await verifyRetainedAssets(directory, results);
+  await writeFile(join(directory, inspections[0]!.previewFile!), "changed pixels");
+  await assert.rejects(verifyRetainedAssets(directory, results), /Retained evidence changed/);
+});
 
 test("Quality: successful execution and exact quotations remain unreviewed; correct paraphrases can pass explicit review", async t => {
   const { results, attempt, events } = await sample(t);
@@ -152,18 +215,25 @@ test("Quality runner retains nonzero process results, abrupt interruption diagno
   assert.match(denied.stderr, /explicit local-model access/);
 });
 
-test("Quality fixtures keep oracles outside inputs and include additions, replacement, removal, copies and read continuation", () => {
-  for (const item of cases) for (let stage = 1; stage <= 2; stage++) {
+test("Quality fixtures keep oracles outside inputs and include additions, replacement, removal, copies and read continuation", async () => {
+  for (const item of [...cases, ...documentCases]) for (let stage = 1; stage <= 2; stage++) {
     const sources = sourcesAt(item, stage);
     const requirements = item.stages[stage - 1]!.required;
     assert.equal(new Set(requirements.map(r => r.id)).size, requirements.length);
     assert.ok(Object.keys(sources).every(path => !path.startsWith("/") && !path.split("/").includes("..")));
     assert.ok(requirements.every(r => r.paths.every(path => path in sources)));
+    for (const input of Object.values(sources)) if (typeof input !== "string") {
+      assert.equal(hash(await readFile(new URL(`./fixtures/documents/${input.asset}`, import.meta.url))), input.sha256);
+    }
   }
   const renewal = cases.find(item => item.id === "Q03")!;
   assert.notEqual(sourcesAt(renewal, 1)["status/current.txt"], sourcesAt(renewal, 2)["status/current.txt"]);
   assert.equal(sourcesAt(renewal, 2)["notes/old-task.txt"], undefined);
   const expense = sourcesAt(cases.find(item => item.id === "Q02")!, 2);
   assert.equal(expense["receipts/receipt.txt"], expense["copies/receipt-copy.txt"]);
-  assert.ok(sourcesAt(cases.find(item => item.id === "Q06")!, 2)["notes/long-log.txt"]!.length > 4_000);
+  const long = sourcesAt(cases.find(item => item.id === "Q06")!, 2)["notes/long-log.txt"];
+  assert.ok(typeof long === "string" && long.length > 4_000);
+  assert.equal([...cases, ...documentCases].length * 3, 30);
+  const images = documentCases[0]!;
+  assert.notDeepEqual(sourcesAt(images, 1)["images/a.png"], sourcesAt(images, 2)["images/a.png"]);
 });
