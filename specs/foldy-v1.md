@@ -80,7 +80,7 @@ Run the application during development through `npm run foldy -- <command>`.
 
 | Entry point | Behavior |
 | --- | --- |
-| `scan <root>` | Inspect once, update internal knowledge when persistence exists, print findings/status, and exit. Never organize or create artifacts in the root. |
+| `scan <root>` | Inspect once, update internal knowledge, atomically save the same JSON report printed on stdout to `<canonical-root>/.foldy.json`, and exit. This reserved export is the only scan-created artifact in the root; source documents are not organized or modified. |
 | `watch <root>` | Observe continuously and accept the controls below on standard input. Automatic mutation is enabled only in chunk 09. |
 
 The foreground watcher accepts:
@@ -136,7 +136,7 @@ Each scenario ID must appear in the corresponding automated test name or live-ev
 
 | ID | Given / When / Then |
 | --- | --- |
-| A01 | Given a root, an outside file, an escaping symlink, and dropped instructions, when inspection/tool requests occur, then outside reads and authority changes are refused and user-file bytes remain unchanged. |
+| A01 | Given a root, an outside file, an escaping symlink, and dropped instructions, when inspection/tool requests occur, then outside reads and authority changes are refused and source-file bytes remain unchanged. CLI scans update only the reserved `.foldy.json` report via an exclusive `.foldy.json.<uuid>.tmp` file; both names are excluded from the root inventory. Symlink/directory report destinations are refused. The export contains accumulated current findings, including incomplete/failed status when returned; an exception before a report leaves the previous export intact. |
 | A02 | Given local Ollama, when scanning two text files, then Pi produces source-referenced findings; with Ollama unavailable, the run reports failure without cloud fallback or false completion. |
 | A03 | Given related files in different directories and different scan sessions, when the process restarts and a further file arrives, then relevant earlier evidence remains retrievable and a supported relationship can be recorded. |
 | A04 | Given identical file copies and similar but unrelated transactions, when relationships are considered, then file identities remain distinct, unrelated records are not asserted equivalent, and no physical deletion occurs. |

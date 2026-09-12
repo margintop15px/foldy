@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import { lstat, open, readdir, realpath, stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
+import { isReportFile } from "./report.ts";
 
 import { MAX_IMAGE_BYTES, MAX_PDF_BYTES, type DocumentCoverage } from "./documents.ts";
 
@@ -52,6 +53,7 @@ export async function inventoryFolder(inputRoot: string, signal: AbortSignal, ex
     children.sort((a, b) => a.name.localeCompare(b.name));
     for (const child of children) {
       signal.throwIfAborted();
+      if (relative === "" && isReportFile(child.name)) continue;
       if (inventory.sources.length >= MAX_ENTRIES) {
         throw new Error(`Inventory stopped at ${MAX_ENTRIES} entries; the rest of the folder was not inspected.`);
       }

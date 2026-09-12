@@ -1,6 +1,7 @@
 import { errorText } from "./inventory.ts";
 import { scan } from "./scan.ts";
 import { selectModel } from "./model.ts";
+import { saveReport } from "./report.ts";
 
 const [command, root, ...extra] = process.argv.slice(2);
 if (command !== "scan" || !root || extra.length) {
@@ -15,7 +16,9 @@ if (command !== "scan" || !root || extra.length) {
     const { provider, modelTag } = selectModel(process.env.FOLDY_PROVIDER, process.env.FOLDY_MODEL);
     if (provider === "openai") console.error("Foldy: OpenAI mode selected; inspected text and page images may be sent to api.openai.com.");
     const report = await scan(root, { provider, model: modelTag, signal: controller.signal });
-    console.log(JSON.stringify(report, null, 2));
+    const json = `${JSON.stringify(report, null, 2)}\n`;
+    await saveReport(report.root, json);
+    process.stdout.write(json);
     process.exitCode = report.status === "complete" ? 0 : report.status === "incomplete" ? 2 : 1;
   } catch (error) {
     console.error(`Foldy: ${errorText(error)}`);
