@@ -1,0 +1,15 @@
+
+> foldy@0.1.0 test:live
+> FOLDY_LIVE=1 node --test --test-concurrency=1 tests/live/chunk-01.live.ts
+
+✔ A02 live: two synthetic files yield valid source-backed findings through local Pi/Ollama (59893.600416ms)
+ℹ {"peakLoadedBytes":5940130609,"memorySamples":60,"memoryMetric":"Ollama /api/ps size, polled each second"}
+ℹ {"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-live-AvhAd4","observedAt":"2026-09-12T00:59:16.386Z","status":"complete","cached":false,"reasoningPending":false,"rebuildingKnowledge":true,"analysisRevision":"7","model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"],"reasoningEffort":"low"},"durationMs":59877,"modelCalls":4,"toolCalls":4,"executedToolCalls":4,"agentUsage":{"inputTokens":4117,"outputTokens":1541,"maxResponseTokens":624,"thinkingResponses":4},"files":[{"path":"notes.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":130}],"size":130,"modifiedAt":"2026-09-12T00:59:16.381Z","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","sourceId":"382a5bb2-bf1f-45da-8ea7-8ba1c85ae610","inspection":"full"},{"path":"project.md","kind":"file","status":"ready","inspected":[{"start":0,"end":122}],"size":122,"modifiedAt":"2026-09-12T00:59:16.382Z","version":"6af0981f2534cbdaefa15d8fabddcf677875a33ccdbb8fcf070e4bcef9b2aef9","sourceId":"8e50234a-68ed-4668-88e3-c1f7ab2f99f9","inspection":"full"}],"findings":[{"id":"fe2d42e1-3b3d-4034-b2ac-50d26d0cad11","claim":"Project Lantern has a prototype review scheduled for 2026-10-15, with Mara responsible for preparing/presenting the demonstration.","kind":"observed","evidence":[{"sourceId":"8e50234a-68ed-4668-88e3-c1f7ab2f99f9","path":"project.md","version":"6af0981f2534cbdaefa15d8fabddcf677875a33ccdbb8fcf070e4bcef9b2aef9","quote":"# Project Lantern\n\nThe prototype review is scheduled for 2026-10-15.\nMara is responsible for preparing the demonstration.","start":0,"end":121,"startLine":1,"endLine":4},{"sourceId":"382a5bb2-bf1f-45da-8ea7-8ba1c85ae610","path":"notes.txt","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","quote":"Project Lantern meeting notes\nMara will present the prototype at the review on 2026-10-15.","start":0,"end":90,"startLine":1,"endLine":2}]},{"id":"bf4ec5fb-b217-4231-a7f8-a9da1cdd70b7","claim":"The Project Lantern team still needs to choose a room for the prototype review.","kind":"observed","evidence":[{"sourceId":"382a5bb2-bf1f-45da-8ea7-8ba1c85ae610","path":"notes.txt","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","quote":"The team still needs to choose a room.","start":91,"end":129,"startLine":3,"endLine":3}]}],"errors":[],"toolErrors":[]}
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60775.10925

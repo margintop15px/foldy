@@ -1,0 +1,113 @@
+{
+  "checkedAt": "2026-09-12T01:24:18.195Z",
+  "offlineTests": 35,
+  "typecheck": "passed",
+  "smoke": "passed with unchanged zero-tool-error assertion",
+  "cases": [
+    {
+      "name": "Q05",
+      "filesUnchangedDuringCollection": true,
+      "fixtureAndOracleUnchanged": true,
+      "scans": [
+        {
+          "stage": 1,
+          "wallMs": 46101,
+          "durationMs": 45647,
+          "status": "complete",
+          "findings": 1,
+          "toolErrors": [],
+          "modelCalls": 4,
+          "toolCalls": 2,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 8,
+          "cached": false,
+          "reasoningPending": false
+        },
+        {
+          "stage": 2,
+          "wallMs": 66402,
+          "durationMs": 64919,
+          "status": "complete",
+          "findings": 2,
+          "toolErrors": [],
+          "modelCalls": 4,
+          "toolCalls": 3,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 8,
+          "cached": false,
+          "reasoningPending": false
+        },
+        {
+          "stage": 3,
+          "wallMs": 1145,
+          "durationMs": 12,
+          "status": "complete",
+          "findings": 2,
+          "toolErrors": [],
+          "modelCalls": 0,
+          "toolCalls": 0,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 0,
+          "cached": true,
+          "reasoningPending": false
+        }
+      ]
+    },
+    {
+      "name": "Q06",
+      "filesUnchangedDuringCollection": true,
+      "fixtureAndOracleUnchanged": true,
+      "scans": [
+        {
+          "stage": 1,
+          "wallMs": 39979,
+          "durationMs": 39507,
+          "status": "complete",
+          "findings": 2,
+          "toolErrors": [],
+          "modelCalls": 4,
+          "toolCalls": 3,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 8,
+          "cached": false,
+          "reasoningPending": false
+        },
+        {
+          "stage": 2,
+          "wallMs": 105680,
+          "durationMs": 105049,
+          "status": "incomplete",
+          "findings": 5,
+          "toolErrors": [],
+          "modelCalls": 6,
+          "toolCalls": 7,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 10,
+          "cached": false,
+          "reasoningPending": false
+        },
+        {
+          "stage": 3,
+          "wallMs": 1304,
+          "durationMs": 13,
+          "status": "incomplete",
+          "findings": 5,
+          "toolErrors": [],
+          "modelCalls": 0,
+          "toolCalls": 0,
+          "issues": [],
+          "sourceBytesUnchanged": true,
+          "networkRequests": 0,
+          "cached": true,
+          "reasoningPending": false
+        }
+      ]
+    }
+  ],
+  "graderUnchanged": true
+}

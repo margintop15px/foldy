@@ -1,0 +1,40 @@
+
+> foldy@0.1.0 test:live
+> FOLDY_LIVE=1 node --test --test-concurrency=1 tests/live/chunk-02.live.ts
+
+✖ A03/A04 live: two batches connect across fresh local-model processes, with a separate near-match and a cached third scan (143655.658125ms)
+ℹ {"batch":1,"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-test-CJhgEv/root","observedAt":"2026-09-12T01:00:54.627Z","status":"complete","cached":false,"reasoningPending":false,"rebuildingKnowledge":true,"analysisRevision":"7","model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"],"reasoningEffort":"low"},"durationMs":41898,"modelCalls":4,"toolCalls":2,"executedToolCalls":2,"agentUsage":{"inputTokens":2668,"outputTokens":1120,"maxResponseTokens":500,"thinkingResponses":4},"files":[{"path":"archive","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-12T01:00:54.176Z","sourceId":"e81ad547-0bbb-43fd-8604-9d9bdb7a9c48","inspection":"none"},{"path":"archive/plan.md","kind":"file","status":"ready","inspected":[{"start":0,"end":117}],"size":117,"modifiedAt":"2026-09-12T01:00:54.176Z","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","sourceId":"96a8fe07-dd03-4dc8-b6e1-275dc1ffa237","inspection":"full"}],"findings":[{"id":"e5d9f0e7-8708-409d-9ca4-e34c47ce5ab0","claim":"Project Lantern (ID: LTN-204) has a prototype review led by Mara on 2026-10-15 with a budget of EUR 240.","kind":"observed","evidence":[{"sourceId":"96a8fe07-dd03-4dc8-b6e1-275dc1ffa237","path":"archive/plan.md","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","quote":"# Project Lantern\n\nProject ID: LTN-204.\nMara leads the prototype review on 2026-10-15.\nThe review budget is EUR 240.","start":0,"end":116,"startLine":1,"endLine":5}]}],"errors":[],"toolErrors":[]}
+ℹ {"batch":2,"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-test-CJhgEv/root","observedAt":"2026-09-12T01:01:37.393Z","status":"complete","cached":false,"reasoningPending":false,"rebuildingKnowledge":false,"analysisRevision":"7","model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"],"reasoningEffort":"low"},"durationMs":100412,"modelCalls":6,"toolCalls":6,"executedToolCalls":6,"agentUsage":{"inputTokens":6325,"outputTokens":2579,"maxResponseTokens":893,"thinkingResponses":6},"files":[{"path":"archive","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-12T01:00:54.176Z","sourceId":"e81ad547-0bbb-43fd-8604-9d9bdb7a9c48","inspection":"none"},{"path":"archive/plan.md","kind":"file","status":"ready","inspected":[{"start":0,"end":117}],"size":117,"modifiedAt":"2026-09-12T01:00:54.176Z","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","sourceId":"96a8fe07-dd03-4dc8-b6e1-275dc1ffa237","inspection":"full"},{"path":"meetings","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-12T01:01:36.548Z","sourceId":"eb47d708-7221-43cb-a01c-8662e8d6716e","inspection":"none"},{"path":"meetings/notes.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":171}],"size":171,"modifiedAt":"2026-09-12T01:01:36.548Z","version":"a3e41f7f492e1380bad943a51e70c93864a16f313f94b0ae508c2ea62cf923c6","sourceId":"42f0b783-4da3-45fd-ad94-1e454775b695","inspection":"full"},{"path":"other","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-12T01:01:36.546Z","sourceId":"9a1df5d6-838a-42c9-9697-f849d650440e","inspection":"none"},{"path":"other/lantern-festival.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":147}],"size":147,"modifiedAt":"2026-09-12T01:01:36.547Z","version":"f42bc89bf2e8c23584f50834118bb28f1b75d0198b36d4d42adac27b67eaa4a8","sourceId":"4d0c8364-b79e-4d7c-af04-8e4871696ddd","inspection":"full"}],"findings":[{"id":"e5d9f0e7-8708-409d-9ca4-e34c47ce5ab0","claim":"Project Lantern (ID: LTN-204) has a prototype review led by Mara on 2026-10-15 with a budget of EUR 240.","kind":"observed","evidence":[{"sourceId":"96a8fe07-dd03-4dc8-b6e1-275dc1ffa237","path":"archive/plan.md","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","quote":"# Project Lantern\n\nProject ID: LTN-204.\nMara leads the prototype review on 2026-10-15.\nThe review budget is EUR 240.","start":0,"end":116,"startLine":1,"endLine":5}]},{"id":"b4a0ecc9-7537-4a9b-b1fb-e09bc8d1219b","claim":"Lantern Festival (Event ID: FEST-811) is a public festival catering order with EUR 240 budget for catering on 2026-10-15, contact Noor.","kind":"observed","evidence":[{"sourceId":"4d0c8364-b79e-4d7c-af04-8e4871696ddd","path":"other/lantern-festival.txt","version":"f42bc89bf2e8c23584f50834118bb28f1b75d0198b36d4d42adac27b67eaa4a8","quote":"Event ID: FEST-811.\nBudget: EUR 240 for catering on 2026-10-15.\nContact: Noor.\nThis is a public festival catering order.","start":26,"end":146,"startLine":2,"endLine":5}]},{"id":"4edfeb33-8e55-4099-beeb-4b4f08843a99","claim":"Project Lantern (ID: LTN-204) prototype review on 2026-10-15 led by Mara with EUR 240 budget, reserving room Cedar.","kind":"observed","evidence":[{"sourceId":"96a8fe07-dd03-4dc8-b6e1-275dc1ffa237","path":"archive/plan.md","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","quote":"Project ID: LTN-204.\nMara leads the prototype review on 2026-10-15.\nThe review budget is EUR 240.","start":19,"end":116,"startLine":3,"endLine":5},{"sourceId":"42f0b783-4da3-45fd-ad94-1e454775b695","path":"meetings/notes.txt","version":"a3e41f7f492e1380bad943a51e70c93864a16f313f94b0ae508c2ea62cf923c6","quote":"Mara confirmed the prototype is ready for the review on 2026-10-15.\nReserve room Cedar using the EUR 240 review budget.","start":51,"end":170,"startLine":3,"endLine":4}]}],"errors":[],"toolErrors":["record_finding: Quotation is not in an excerpt read in this session from archive/plan.md. Read the source with read_file and copy the exact text, including punctuation and line breaks."]}
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 144563.02975
+
+✖ failing tests:
+
+test at tests/live/chunk-02.live.ts:12:1
+✖ A03/A04 live: two batches connect across fresh local-model processes, with a separate near-match and a cached third scan (143655.658125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'record_finding: Quotation is not in an excerpt read in this session from archive/plan.md. Read the source with read_file and copy the exact text, including punctuation and line breaks.'
+  + ]
+  - []
+  
+      at runScan (file:///Users/usuario/Projects/foldy/tests/live/chunk-02.live.ts:29:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///Users/usuario/Projects/foldy/tests/live/chunk-02.live.ts:38:18)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'record_finding: Quotation is not in an excerpt read in this session from archive/plan.md. Read the source with read_file and copy the exact text, including punctuation and line breaks.' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

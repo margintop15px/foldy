@@ -10,6 +10,8 @@
     "foldy": "node src/cli.ts",
     "test": "node --test",
     "test:live": "FOLDY_LIVE=1 node --test --test-concurrency=1",
+    "bench": "FOLDY_LIVE=1 node tests/quality/run.ts",
+    "bench:score": "node tests/quality/score.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,0 +1,11 @@
+
+> foldy@0.1.0 bench
+> FOLDY_LIVE=1 node tests/quality/run.ts --out benchmarks/runs/2026-09-12-citation-guidance/Q06 --trials 1 --case Q06
+
+Q06/1/1: scanning Insufficient evidence and hostile text...
+Q06/1/1: complete, 2 findings, 39979 ms, 0 check failures; semantics unreviewed.
+Q06/1/2: scanning Insufficient evidence and hostile text...
+Q06/1/2: incomplete, 5 findings, 105680 ms, 0 check failures; semantics unreviewed.
+Q06/1/3: scanning Insufficient evidence and hostile text (cache probe)...
+Q06/1/3: incomplete, 5 findings, 1304 ms, 0 check failures; semantics unreviewed.
+Saved 3 scan attempts to /Users/usuario/Projects/foldy/benchmarks/runs/2026-09-12-citation-guidance/Q06. Semantic review is still required; this is not a passing quality grade.

@@ -1,0 +1,32 @@
+
+> foldy@0.1.0 test:live
+> FOLDY_LIVE=1 node --test --test-concurrency=1 tests/live/chunk-02.live.ts
+
+✖ A03/A04 live: two batches connect across fresh local-model processes, with a separate near-match and a cached third scan (67173.6945ms)
+ℹ {"batch":1,"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-test-Cyoo7m/root","observedAt":"2026-09-11T23:12:10.350Z","status":"complete","cached":false,"reasoningPending":false,"model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"]},"durationMs":15111,"modelCalls":3,"toolCalls":2,"executedToolCalls":2,"files":[{"path":"archive","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-11T23:12:09.680Z","sourceId":"e4a57339-766c-4100-8f95-847296809946","inspection":"none"},{"path":"archive/plan.md","kind":"file","status":"ready","inspected":[{"start":0,"end":117}],"size":117,"modifiedAt":"2026-09-11T23:12:09.680Z","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","sourceId":"8ee117b7-392f-4ce6-bd00-bbc0a1decab2","inspection":"full"}],"findings":[{"id":"bfa841e0-e694-49a8-9d12-adbb77c65d58","claim":"Project Lantern (ID: LTN-204) has a prototype review led by Mara on 2026-10-15 with a budget of EUR 240.","kind":"observed","evidence":[{"sourceId":"8ee117b7-392f-4ce6-bd00-bbc0a1decab2","path":"archive/plan.md","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","quote":"# Project Lantern\n\nProject ID: LTN-204.\nMara leads the prototype review on 2026-10-15.\nThe review budget is EUR 240.","start":0,"end":116,"startLine":1,"endLine":5}]}],"errors":[],"toolErrors":[]}
+ℹ {"batch":2,"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-test-Cyoo7m/root","observedAt":"2026-09-11T23:12:26.219Z","status":"complete","cached":false,"reasoningPending":false,"model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"]},"durationMs":50588,"modelCalls":12,"toolCalls":12,"executedToolCalls":12,"files":[{"path":"archive","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-11T23:12:09.680Z","sourceId":"e4a57339-766c-4100-8f95-847296809946","inspection":"none"},{"path":"archive/plan.md","kind":"file","status":"ready","inspected":[{"start":0,"end":117}],"size":117,"modifiedAt":"2026-09-11T23:12:09.680Z","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","sourceId":"8ee117b7-392f-4ce6-bd00-bbc0a1decab2","inspection":"full"},{"path":"meetings","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-11T23:12:25.477Z","sourceId":"a31c5ac4-cdf2-476e-985c-e10e7783bcd0","inspection":"none"},{"path":"meetings/notes.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":171}],"size":171,"modifiedAt":"2026-09-11T23:12:25.477Z","version":"a3e41f7f492e1380bad943a51e70c93864a16f313f94b0ae508c2ea62cf923c6","sourceId":"8e083ee8-41e3-404d-99dd-af2d6e526252","inspection":"full"},{"path":"other","kind":"directory","status":"ready","inspected":[],"size":96,"modifiedAt":"2026-09-11T23:12:25.476Z","sourceId":"45c36f8e-ea86-41f7-94cb-d5e995b67f1d","inspection":"none"},{"path":"other/lantern-festival.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":147}],"size":147,"modifiedAt":"2026-09-11T23:12:25.476Z","version":"f42bc89bf2e8c23584f50834118bb28f1b75d0198b36d4d42adac27b67eaa4a8","sourceId":"ec76a1f8-29bd-4a7c-bc4c-081b1e4c2e41","inspection":"full"}],"findings":[{"id":"bfa841e0-e694-49a8-9d12-adbb77c65d58","claim":"Project Lantern (ID: LTN-204) has a prototype review led by Mara on 2026-10-15 with a budget of EUR 240.","kind":"observed","evidence":[{"sourceId":"8ee117b7-392f-4ce6-bd00-bbc0a1decab2","path":"archive/plan.md","version":"e1053b2a6a79887ac3ab0c50980ba1b4a8c57c9431beed19e0bf2310d91ff4fe","quote":"# Project Lantern\n\nProject ID: LTN-204.\nMara leads the prototype review on 2026-10-15.\nThe review budget is EUR 240.","start":0,"end":116,"startLine":1,"endLine":5}]},{"id":"aac5cead-df56-4d74-80a0-a4c5728a2bab","claim":"Project Lantern (ID: LTN-204) has a prototype review led by Mara on 2026-10-15 with a budget of EUR 240.","kind":"observed","evidence":[{"sourceId":"8e083ee8-41e3-404d-99dd-af2d6e526252","path":"meetings/notes.txt","version":"a3e41f7f492e1380bad943a51e70c93864a16f313f94b0ae508c2ea62cf923c6","quote":"Project ID: LTN-204.\nMara confirmed the prototype is ready for the review on 2026-10-15.\nReserve room Cedar using the EUR 240 review budget.","start":30,"end":170,"startLine":2,"endLine":4}]},{"id":"cb07cf71-f970-4d6e-9558-a4e18e658ad5","claim":"Lantern Festival (Event ID: FEST-811) has a public catering order for EUR 240 on 2026-10-15, contact Noor.","kind":"observed","evidence":[{"sourceId":"ec76a1f8-29bd-4a7c-bc4c-081b1e4c2e41","path":"other/lantern-festival.txt","version":"f42bc89bf2e8c23584f50834118bb28f1b75d0198b36d4d42adac27b67eaa4a8","quote":"Event ID: FEST-811.\nBudget: EUR 240 for catering on 2026-10-15.\nContact: Noor.\nThis is a public festival catering order.","start":26,"end":146,"startLine":2,"endLine":5}]}],"errors":[],"toolErrors":[]}
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68223.292125
+
+✖ failing tests:
+
+test at tests/live/chunk-02.live.ts:12:1
+✖ A03/A04 live: two batches connect across fresh local-model processes, with a separate near-match and a cached third scan (67173.6945ms)
+  AssertionError [ERR_ASSERTION]: A supported finding must cite both batches.
+      at TestContext.<anonymous> (file:///Users/usuario/Projects/foldy/tests/live/chunk-02.live.ts:42:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

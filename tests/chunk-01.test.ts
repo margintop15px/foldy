@@ -1,60 +1,27 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { chmod, lstat, mkdir, mkdtemp, readFile, readdir, readlink, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { beforeEach, test, type TestContext } from "node:test";
-import { createAssistantMessageEventStream, type AssistantMessage, type Context, type ToolCall } from "@earendil-works/pi-ai";
+import { beforeEach, test } from "node:test";
+import { createAssistantMessageEventStream, type AssistantMessage } from "@earendil-works/pi-ai";
 import { inventoryFolder, MAX_FILE_BYTES, READ_CHARACTERS } from "../src/inventory.ts";
 import { createScanSession, localFetch, prepareLocalModel, SYSTEM_PROMPT, type ModelStream } from "../src/model.ts";
 import { scan } from "../src/scan.ts";
+import { fixture, tree, call, read, finding, scripted } from "./helpers.ts";
 
-beforeEach(t => {
+beforeEach(async t => {
   assert.ok("mock" in t);
   t.mock.method(globalThis, "fetch", () => { throw new Error("Offline tests must never access the network."); });
+  const stateDir = await mkdtemp(join(tmpdir(), "foldy-state-test-"));
+  const previous = process.env.FOLDY_STATE_DIR;
+  process.env.FOLDY_STATE_DIR = stateDir;
+  t.after(async () => {
+    if (previous === undefined) delete process.env.FOLDY_STATE_DIR;
+    else process.env.FOLDY_STATE_DIR = previous;
+    await rm(stateDir, { recursive: true, force: true });
+  });
 });
-
-async function fixture(t: TestContext) {
-  const directory = await realpath(await mkdtemp(join(tmpdir(), "foldy-test-")));
-  t.after(() => rm(directory, { recursive: true, force: true }));
-  const root = join(directory, "root");
-  await mkdir(root);
-  return { directory, root };
-}
-
-async function tree(root: string): Promise<unknown[]> {
-  const rows: unknown[] = [];
-  for (const name of (await readdir(root)).sort()) {
-    const path = join(root, name);
-    const info = await lstat(path);
-    rows.push([name, info.mode, info.isSymbolicLink() ? await readlink(path) : info.isDirectory()
-      ? await tree(path) : createHash("sha256").update(await readFile(path)).digest("hex")]);
-  }
-  return rows;
-}
-
-const call = (name: string, args: Record<string, unknown>, id = name): ToolCall => ({ type: "toolCall", id, name, arguments: args });
-const read = (path: string, offset?: number) => call("read_file", { path, ...(offset === undefined ? {} : { offset }) }, `read-${path}-${offset}`);
-const finding = (path: string, quote: string) => call("record_finding", { claim: quote, kind: "observed", evidence: [{ path, quote }] });
-
-function scripted(turn: (context: Context, index: number) => ToolCall[] | "error"): ModelStream {
-  let index = 0;
-  return (model, context) => {
-    const reply = turn(context, index++);
-    const message: AssistantMessage = {
-      role: "assistant", model: model.id, provider: model.provider, api: model.api,
-      timestamp: Date.now(), stopReason: reply === "error" ? "error" : reply.length ? "toolUse" : "stop",
-      content: reply === "error" ? [] : reply.length ? reply : [{ type: "text", text: "Done." }],
-      usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0,
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
-      ...(reply === "error" ? { errorMessage: "Local inference unavailable (offline simulation)." } : {}),
-    };
-    const stream = createAssistantMessageEventStream();
-    if (message.stopReason === "error") stream.push({ type: "error", reason: "error", error: message });
-    else stream.push({ type: "done", reason: reply.length ? "toolUse" : "stop", message });
-    return stream;
-  };
-}
 
 test("A01/A02: canonical root, exact versioned evidence, CSV text, unchanged source tree", async t => {
   const { directory, root } = await fixture(t);
@@ -90,7 +57,7 @@ test("A01: outside paths, sibling-prefix paths, descendant symlinks, and shell r
     call("bash", { command: "write a file" }), read("inside.txt")], []];
   const report = await scan(root, { stream: scripted((context, index) => {
     assert.ok(!JSON.stringify(context).includes("OUTSIDE_SECRET"));
-    assert.deepEqual(context.tools?.map(tool => tool.name), ["read_file", "record_finding"]);
+    assert.deepEqual(context.tools?.map(tool => tool.name), ["read_file", "record_finding", "search_context"]);
     return batches[index]!;
   }) });
   assert.equal(report.files.filter(source => source.kind === "symlink").length, 3);
@@ -220,6 +187,39 @@ test("A02/RUN-02: Pi compaction uses the same offline model replacement", async 
     await session.compact();
     assert.equal(turns, 3);
   } finally { await session.abort(); session.dispose(); }
+});
+
+test("A02: advertised thinking selects low effort and uses the bounded local provider", async t => {
+  const { root } = await fixture(t);
+  for (const thinking of [false, true]) {
+    let inferenceRequests = 0;
+    let inferenceBody: Record<string, unknown> | undefined;
+    t.mock.method(globalThis, "fetch", async (input: string | URL | Request, init?: RequestInit) => {
+      const path = new URL(String(input)).pathname;
+      if (path === "/v1/chat/completions") {
+        inferenceRequests++;
+        inferenceBody = await new Request(input, init).json();
+        const chunk = { id: "test", model: "test", choices: [{ index: 0, delta: { role: "assistant", content: "Done." }, finish_reason: "stop" }] };
+        return new Response(`data: ${JSON.stringify(chunk)}\n\ndata: [DONE]\n\n`, { headers: { "Content-Type": "text/event-stream" } });
+      }
+      if (path === "/api/show") return Response.json({ model_info: { "general.architecture": "qwen" }, capabilities: thinking ? ["tools", "thinking"] : ["tools"] });
+      if (path === "/api/ps") return Response.json({ models: [{ name: "test:latest", context_length: 16_384, digest: "synthetic" }] });
+      return Response.json({ version: "test" });
+    });
+    const model = await prepareLocalModel("test", new AbortController().signal);
+    assert.equal(model.reasoningEffort, thinking ? "low" : "none");
+    const session = await createScanSession(root, [], model, new AbortController().signal);
+    try {
+      await session.prompt("Synthetic provider check.");
+      assert.equal(inferenceRequests, 1, "Inspect the actual OpenAI-compatible request with inference replaced by local test SSE.");
+      assert.ok(inferenceBody);
+      assert.equal(inferenceBody.reasoning_effort, thinking ? "low" : "none");
+      assert.equal(inferenceBody.max_tokens, 2_048);
+      assert.equal(inferenceBody.temperature, 0);
+      assert.equal((session.agent.state.messages.at(-1) as AssistantMessage).stopReason, "stop");
+    }
+    finally { await session.abort(); session.dispose(); }
+  }
 });
 
 test("RUN-02: an oversized tool batch executes at most 20 calls and does not start another model turn", async t => {

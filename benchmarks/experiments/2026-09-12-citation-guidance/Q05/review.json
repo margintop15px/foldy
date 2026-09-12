@@ -1,0 +1,75 @@
+{
+  "reviewer": "Codex manual evidence review; one targeted trial, independent human calibration pending.",
+  "resultsHash": "88bb12c46be5ea0aab047d2ee7914d34376c7c22c2a6af8a7e263be1931059f6",
+  "stages": {
+    "Q05/1/1": {
+      "reportHash": "70f6cf425e4e5f5aca8d711f78d4ad7432e8eab42497f92f12a0191af6d14837",
+      "usefulness": 2,
+      "notes": "All of the single finding is supported. No citation errors.",
+      "claims": [
+        {
+          "text": "Engineering proposes 2026-11-09 for Orchard OR-517; the date is not final.",
+          "findings": [
+            1
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [
+            "proposal"
+          ],
+          "reason": "The exact engineering quotation supplies the release, proposed date and non-final status."
+        }
+      ]
+    },
+    "Q05/1/2": {
+      "reportHash": "768bac951693ffa2ebf6de12af4b368651b424b9b25b64f60f61e3c4dabb650a",
+      "usefulness": 2,
+      "notes": "Both findings and all quoted sources were manually checked. Original evidence was reread before recording the joint finding. No deadline was selected and no citation was rejected.",
+      "claims": [
+        {
+          "text": "Engineering proposes 2026-11-09 for Orchard OR-517, with no final decision.",
+          "findings": [
+            1,
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "Both occurrences cite the full original engineering note."
+        },
+        {
+          "text": "Marketing proposes 2026-11-16 for Orchard OR-517, with no final decision.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "The full marketing note is quoted in the joint finding."
+        },
+        {
+          "text": "Neither department has decision authority.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "fact",
+          "covers": [],
+          "reason": "Marketing states this explicitly; the joint finding does not assign authority."
+        },
+        {
+          "text": "The two different dates remain unresolved proposals for the same release.",
+          "findings": [
+            2
+          ],
+          "label": "supported",
+          "kind": "uncertainty",
+          "covers": [
+            "conflict"
+          ],
+          "reason": "One finding cites both shared-identifier notes, preserves both dates as proposals and chooses neither."
+        }
+      ]
+    }
+  }
+}

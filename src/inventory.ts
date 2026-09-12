@@ -8,6 +8,7 @@ export const MAX_ENTRIES = 200;
 export const READ_CHARACTERS = 4_000;
 
 export interface Source {
+  sourceId?: string;
   path: string;
   kind: "file" | "directory" | "symlink" | "other";
   status: "ready" | "skipped" | "unsupported" | "error";
@@ -24,16 +25,18 @@ export interface Inventory {
   observedAt: string;
   sources: Source[];
   errors: string[];
+  enumerationComplete: boolean;
 }
 
 export function errorText(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export async function inventoryFolder(inputRoot: string, signal: AbortSignal): Promise<Inventory> {
+export async function inventoryFolder(inputRoot: string, signal: AbortSignal, expectedRoot?: string): Promise<Inventory> {
   const root = await realpath(inputRoot);
+  if (expectedRoot !== undefined && root !== expectedRoot) throw new Error("The scan root changed before inventory; scan again.");
   if (!(await stat(root)).isDirectory()) throw new Error("The scan root must be an existing directory.");
-  const inventory: Inventory = { root, observedAt: new Date().toISOString(), sources: [], errors: [] };
+  const inventory: Inventory = { root, observedAt: new Date().toISOString(), sources: [], errors: [], enumerationComplete: true };
 
   async function walk(relative: string, depth: number): Promise<void> {
     signal.throwIfAborted();
@@ -113,6 +116,8 @@ export async function inventoryFolder(inputRoot: string, signal: AbortSignal): P
           source.reason = "Only regular files and directories are inspected.";
         }
       } catch (error) {
+        // A failed directory listing (or an entry we could not stat) can hide children.
+        if (source.kind === "directory" || source.kind === "other") inventory.enumerationComplete = false;
         source.status = "error";
         source.reason = errorText(error);
         if (inventory.sources.length >= MAX_ENTRIES) throw error;
@@ -123,6 +128,7 @@ export async function inventoryFolder(inputRoot: string, signal: AbortSignal): P
   try {
     await walk("", 0);
   } catch (error) {
+    inventory.enumerationComplete = false;
     inventory.errors.push(errorText(error));
   }
   return inventory;

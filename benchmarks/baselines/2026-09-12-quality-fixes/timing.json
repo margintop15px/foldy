@@ -1,0 +1,270 @@
+{
+  "resultsHash": "11b8dc149a33a4e5ec0b9ac1bca8c31d4f5bd7ab656d286a8831559429c0d565",
+  "units": "milliseconds unless stated",
+  "collectionMs": 3331870,
+  "stage1Wall": {
+    "n": 18,
+    "median": 50504,
+    "min": 39173,
+    "max": 93767
+  },
+  "stage2Wall": {
+    "n": 18,
+    "median": 124189,
+    "min": 87542,
+    "max": 196369
+  },
+  "allLiveWall": {
+    "n": 36,
+    "median": 91715,
+    "min": 39173,
+    "max": 196369
+  },
+  "scanWork": {
+    "n": 36,
+    "median": 91093,
+    "min": 38720,
+    "max": 195190
+  },
+  "cacheWall": {
+    "n": 18,
+    "median": 1346.5,
+    "min": 885,
+    "max": 1640
+  },
+  "cacheWork": {
+    "n": 18,
+    "median": 13,
+    "min": 7,
+    "max": 21
+  },
+  "toolExecutionPerScan": {
+    "n": 36,
+    "median": 21,
+    "min": 10,
+    "max": 82
+  },
+  "tools": [
+    {
+      "key": "Q01/1/1",
+      "totalMs": 13
+    },
+    {
+      "key": "Q01/1/2",
+      "totalMs": 14
+    },
+    {
+      "key": "Q02/1/1",
+      "totalMs": 14
+    },
+    {
+      "key": "Q02/1/2",
+      "totalMs": 52
+    },
+    {
+      "key": "Q03/1/1",
+      "totalMs": 24
+    },
+    {
+      "key": "Q03/1/2",
+      "totalMs": 19
+    },
+    {
+      "key": "Q04/1/1",
+      "totalMs": 18
+    },
+    {
+      "key": "Q04/1/2",
+      "totalMs": 37
+    },
+    {
+      "key": "Q05/1/1",
+      "totalMs": 21
+    },
+    {
+      "key": "Q05/1/2",
+      "totalMs": 33
+    },
+    {
+      "key": "Q06/1/1",
+      "totalMs": 19
+    },
+    {
+      "key": "Q06/1/2",
+      "totalMs": 46
+    },
+    {
+      "key": "Q01/2/1",
+      "totalMs": 10
+    },
+    {
+      "key": "Q01/2/2",
+      "totalMs": 39
+    },
+    {
+      "key": "Q02/2/1",
+      "totalMs": 21
+    },
+    {
+      "key": "Q02/2/2",
+      "totalMs": 47
+    },
+    {
+      "key": "Q03/2/1",
+      "totalMs": 16
+    },
+    {
+      "key": "Q03/2/2",
+      "totalMs": 28
+    },
+    {
+      "key": "Q04/2/1",
+      "totalMs": 20
+    },
+    {
+      "key": "Q04/2/2",
+      "totalMs": 69
+    },
+    {
+      "key": "Q05/2/1",
+      "totalMs": 18
+    },
+    {
+      "key": "Q05/2/2",
+      "totalMs": 16
+    },
+    {
+      "key": "Q06/2/1",
+      "totalMs": 24
+    },
+    {
+      "key": "Q06/2/2",
+      "totalMs": 30
+    },
+    {
+      "key": "Q01/3/1",
+      "totalMs": 10
+    },
+    {
+      "key": "Q01/3/2",
+      "totalMs": 82
+    },
+    {
+      "key": "Q02/3/1",
+      "totalMs": 16
+    },
+    {
+      "key": "Q02/3/2",
+      "totalMs": 21
+    },
+    {
+      "key": "Q03/3/1",
+      "totalMs": 11
+    },
+    {
+      "key": "Q03/3/2",
+      "totalMs": 30
+    },
+    {
+      "key": "Q04/3/1",
+      "totalMs": 13
+    },
+    {
+      "key": "Q04/3/2",
+      "totalMs": 24
+    },
+    {
+      "key": "Q05/3/1",
+      "totalMs": 21
+    },
+    {
+      "key": "Q05/3/2",
+      "totalMs": 30
+    },
+    {
+      "key": "Q06/3/1",
+      "totalMs": 14
+    },
+    {
+      "key": "Q06/3/2",
+      "totalMs": 45
+    }
+  ],
+  "modelCalls": 188,
+  "toolCalls": 178,
+  "recoveredToolErrors": 9,
+  "inputTokens": 192279,
+  "outputTokens": 68418,
+  "maxResponseTokens": 1122,
+  "thinkingResponses": 188,
+  "errors": [],
+  "codeProvenance": [
+    {
+      "path": "package-lock.json",
+      "unchanged": true
+    },
+    {
+      "path": "package.json",
+      "unchanged": true
+    },
+    {
+      "path": "src/cli.ts",
+      "unchanged": true
+    },
+    {
+      "path": "src/inventory.ts",
+      "unchanged": true
+    },
+    {
+      "path": "src/model.ts",
+      "unchanged": true
+    },
+    {
+      "path": "src/scan.ts",
+      "unchanged": true
+    },
+    {
+      "path": "src/store.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/helpers.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality.test.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality/cases.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality/harness.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality/run.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality/scan-process.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tests/quality/score.ts",
+      "unchanged": true
+    },
+    {
+      "path": "tsconfig.json",
+      "unchanged": true
+    }
+  ],
+  "caveats": [
+    "Agent token counts exclude separate Pi compaction and Ollama preflight; wall time includes them.",
+    "inputTokens sums the SDK usage.input field, which excludes separately reported cache-read/write tokens; it is not total prompt volume.",
+    "Tool durations measure instrumented tool execution. Remaining time also includes model calls, preflight, session and application overhead.",
+    "Baseline and current runs share fixtures and hardware but change prompts, thinking mode, evidence checks and the output-token adapter. This is not an isolated causal measurement of thinking.",
+    "Host workload and thermal conditions were not controlled. A single host sample is retained separately."
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "at": "2026-09-12T00:11:42.360380+00:00",
+  "note": "Single observational host sample during the run. Cumulative VM counters do not establish current swapping; restricted queries may be unavailable. No other applications were stopped.",
+  "samples": [
+    {
+      "command": [
+        "vm_stat"
+      ],
+      "exitCode": 0,
+      "stdout": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     4222.\nPages active:                                 178092.\nPages inactive:                               176265.\nPages speculative:                               583.\nPages throttled:                                   0.\nPages wired down:                             679161.\nPages purgeable:                                   2.\n\"Translation faults\":                    15860745727.\nPages copy-on-write:                      1580405894.\nPages zero filled:                        5551509656.\nPages reactivated:                        1436395087.\nPages purged:                              312516783.\nFile-backed pages:                            117370.\nAnonymous pages:                              237570.\nPages stored in compressor:                  3921320.\nPages occupied by compressor:                 491733.\nDecompressions:                           1500399275.\nCompressions:                             1557314169.\nPageins:                                   135703610.\nPageouts:                                    3087118.\nSwapins:                                     7115630.\nSwapouts:                                    9889337.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "memory_pressure",
+        "-Q"
+      ],
+      "exitCode": 0,
+      "stdout": "The system has 25769803776 (1572864 pages with a page size of 16384).\nSystem-wide memory free percentage: 23%\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uptime"
+      ],
+      "exitCode": 0,
+      "stdout": " 2:11  3 users, load averages: 11.34 7.73 6.77\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "sysctl",
+        "vm.swapusage"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted\n"
+    },
+    {
+      "command": [
+        "pmset",
+        "-g",
+        "therm"
+      ],
+      "exitCode": 0,
+      "stdout": "Error:Failed to get thermal warning level with error code 0xe00002bc\nError: Failed to get performance warning level with error code 0xe00002bc\nError: No CPU power status with error code 0xe00002bc\n",
+      "stderr": ""
+    }
+  ]
+}

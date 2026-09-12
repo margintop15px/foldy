@@ -11,6 +11,8 @@ test("A02 live: two synthetic files yield valid source-backed findings through l
   assert.equal(process.env.FOLDY_LIVE, "1", "Live model access requires npm run test:live.");
   const root = await mkdtemp(join(tmpdir(), "foldy-live-"));
   t.after(() => rm(root, { recursive: true, force: true }));
+  const stateDir = await mkdtemp(join(tmpdir(), "foldy-live-state-"));
+  t.after(() => rm(stateDir, { recursive: true, force: true }));
   await cp(fileURLToPath(new URL("../fixtures/text/", import.meta.url)), root, { recursive: true });
   const names = (await readdir(root)).sort();
   const before = new Map(await Promise.all(names.map(async name => [name, await readFile(join(root, name))] as const)));
@@ -24,7 +26,7 @@ test("A02 live: two synthetic files yield valid source-backed findings through l
   };
   // This measures Ollama's reported allocation, not whole-process RSS or total system memory.
   const sampler = setInterval(() => { void sampleMemory().catch(() => {}); }, 1_000);
-  const report = await scan(root, { model: selectedModel }).finally(() => clearInterval(sampler));
+  const report = await scan(root, { stateDir, model: selectedModel }).finally(() => clearInterval(sampler));
   await sampleMemory().catch(() => {});
   t.diagnostic(JSON.stringify({ peakLoadedBytes, memorySamples, memoryMetric: "Ollama /api/ps size, polled each second" }));
   t.diagnostic(JSON.stringify(report));

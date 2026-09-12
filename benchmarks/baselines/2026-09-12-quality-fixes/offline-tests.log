@@ -1,0 +1,46 @@
+
+> foldy@0.1.0 test
+> node --test
+
+✔ A01/A02: canonical root, exact versioned evidence, CSV text, unchanged source tree (44.112084ms)
+✔ A01: outside paths, sibling-prefix paths, descendant symlinks, and shell requests are refused (13.36825ms)
+✔ A01: hostile project resources are data, never Pi configuration or executable extensions (29.330708ms)
+✔ A06/CTX-01: fabricated, unread, and beyond-excerpt evidence cannot become findings (23.936417ms)
+✔ A06: invalid UTF-8, unsupported formats, oversized and unreadable files stay visible; other files continue (15.70225ms)
+✔ A02: unavailable inference is a failed run with pending input and no fallback (10.309208ms)
+✔ A02: an unreachable Ollama server fails preflight without a retry or fallback (5.307208ms)
+✔ A01/A02: local model preflight refuses cloud weights before sending document content (2.463167ms)
+✔ A02/RUN-02: Pi compaction uses the same offline model replacement (7.235042ms)
+✔ A02: advertised thinking selects low effort and uses the bounded local provider (17.268792ms)
+✔ RUN-02: an oversized tool batch executes at most 20 calls and does not start another model turn (12.053916ms)
+✔ RUN-02: invalid and unknown tool calls consume the budget too (12.849333ms)
+✔ RUN-02: wall-clock budget aborts model work and leaves inputs pending (305.017333ms)
+✔ A01: missing and non-directory roots are rejected before model access (1.611208ms)
+✔ A03/A04: fresh processes retrieve earlier evidence, keep near-matches separate, and cache the third scan (2622.640083ms)
+✔ A03/A04: stable distinct identities, root isolation, exact finding deduplication, and model tag invalidation (77.775584ms)
+✔ A03/CTX-01: a reasoning upgrade migrates old state, keeps history, and revalidates before caching (50.964459ms)
+✔ A03/RUN-02: completeness can add an omission without resetting the tool budget (46.57275ms)
+✔ A03/A09: changed, missing, unreadable and reverted sources cannot supply stale current conclusions (72.484416ms)
+✔ A03/A08: incomplete enumeration hides unverified knowledge without deleting source identities (169.409ms)
+✔ A03/A06: partial inspection is durable; search snippets do not authorize unseen quotations (34.121791ms)
+✔ A03/A06/RUN-02: failure and controlled cancellation commit valid findings and force a retry (32.198708ms)
+✔ A03/A06: unsupported inputs stay visible without repeated inference; literal search has ten-result pages (66.487542ms)
+✔ A01/A03: state is private, outside the root, and existing databases are validated without reset (23.770625ms)
+✔ A03: storage failures inside tools fail visibly and roll back instead of pretending completion (18.974084ms)
+✔ A03/A08: overlapping scans are refused; abrupt termination rolls back and preserves committed knowledge (1172.405209ms)
+✔ Quality: successful execution and exact quotations remain unreviewed; correct paraphrases can pass explicit review (39.779542ms)
+✔ Quality: wrong amount, negation and swapped entities fail despite valid quoted evidence and keyword overlap (36.220666ms)
+✔ Quality: stale grades, omitted findings and missing required source evidence cannot get a passing score (13.972458ms)
+✔ Quality: empty, failed and cancelled scans do not become quality passes; precision without claims is N/A (13.067208ms)
+✔ Quality: a relationship needs a finding citing both sources; the reviewer cannot synthesize a missing connection (12.856708ms)
+✔ Quality: unchanged cache uses no model or network, preserves findings, and supports an honest unsupported-input status (23.529667ms)
+✔ Quality runner retains nonzero process results, abrupt interruption diagnostics, and requires a live opt-in (1097.422958ms)
+✔ Quality fixtures keep oracles outside inputs and include additions, replacement, removal, copies and read continuation (1.166042ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5364.184917

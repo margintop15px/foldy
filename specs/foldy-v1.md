@@ -6,9 +6,9 @@ Status: v1 behavioral contract. Implemented chunks and passing checks are tracke
 
 **V1-01 — One local workspace.** The user selects one existing local directory. Foldy resolves its canonical path and operates on that root and its descendants. v1 skips descendant symlinks, including links whose targets happen to be inside the root. Only one Foldy process may manage that root and update its internal state at a time; a second `scan` or `watch` process for the same root exits with a clear message. The user and other applications can still create, edit, move, and remove files normally. This rule prevents competing Foldy instances; it does not lock the folder against user edits.
 
-**V1-02 — Local inference.** Use Pi as an embedded library with explicitly supplied tools, settings, and resource loading. Start with Ollama serving `qwen3.5:9b` on loopback. Keep model selection configurable through the existing integration. MiniCPM5-2B is a candidate for text/tool-use evaluation as described in the README; complete v1 acceptance requires both structured tool use and image understanding. A text-only configuration must visibly report unavailable vision rather than claim to have inspected image contents. Processing has no cloud fallback. Setup may download dependencies and model weights; document processing must not send content to remote services. An unavailable model produces a visible error and preserves pending work.
+**V1-02 — Local inference.** Use Pi as an embedded library with explicitly supplied tools, settings, and resource loading. Start with Ollama serving `qwen3.5:9b` on loopback. Keep model selection configurable through the existing integration. MiniCPM5-2B is a candidate for text/tool-use evaluation as described in the README; complete v1 acceptance requires both structured tool use and image understanding. A text-only configuration must visibly report unavailable vision rather than claim to have inspected image contents. Inference and document extraction stay local, with no cloud fallback. Setup may download dependencies and model weights. The communication exception is the optional [CopilotKit Channels integration, Telegram first](telegram-v1.md): useful messages and Foldy-generated artifacts go to the paired chat, and required Intelligence coordination and user-facing messaging/UI data may go to the configured service. Original source attachments and raw Pi context/traces are not exported. An unavailable model produces a visible error and preserves pending work.
 
-**V1-03 — Small execution model.** One foreground process observes and reasons, with at most one active agent run and serial file mutations. `scan` runs once and exits. `watch` observes continuously and accepts terminal controls. There is no desktop UI, background service installation, or general workflow engine in v1.
+**V1-03 — Small execution model.** One foreground process observes and reasons, with at most one active agent run and serial file mutations. `scan` runs once and exits. `watch` observes continuously and accepts terminal controls. Optional CopilotKit Channels and CopilotRuntime run inside that watcher and share its controls and scheduler; their required Intelligence connection is an explicit service dependency. Telegram is the first provider. There is no desktop UI, public HTTP endpoint, background service installation, or general workflow engine in v1.
 
 ## 2. Observation
 
@@ -36,6 +36,8 @@ Preserve formulas and any stored results separately. Mark stored formula results
 
 **CTX-02 — Cross-file context.** A run can retrieve relevant information from the whole root, including files inspected in earlier runs and other subdirectories. Supply a compact overview and retrieve original evidence as needed. Start with simple SQLite records and text search. The reasoning context must not grow by continually appending the entire folder or an unbounded conversation.
 
+Reconcile inputs before reusing saved findings. An unchanged scan with completed reasoning and the same selected model tag returns cached current findings without contacting the model. New or changed inputs, loss of current evidence, a different model tag, or unfinished reasoning require re-evaluation. Unsupported inputs remain visible without repeatedly triggering reasoning by themselves. Persist actual inspection coverage separately from extracted content; searching a snippet does not imply full inspection.
+
 **CTX-03 — Uncertainty.** Distinguish observed information, inferred relationships, and explicit user confirmations. Retain conflicting evidence. An inference such as two documents describing one expense must identify its evidence and uncertainty. Similar amounts, dates, or filenames alone must not silently merge records or authorize physical deletion.
 
 **CTX-04 — Invalidation.** When a source version changes or disappears, mark findings depending on that version stale, including conclusions that depend on those findings. Stale information remains available for historical explanations but is excluded from current conclusions and action preconditions until re-evaluated. Mark generated artifacts that depended on it stale in the journal; do not silently overwrite them.
@@ -50,11 +52,13 @@ Broader preferences inferred from a correction stay tentative. An external move 
 
 **RUN-02 — Bounded execution.** Initial limits are 20 model-requested tool calls and five minutes per run, whichever is reached first. Cancel model work and stop at a safe operation boundary when a limit is reached. Record incomplete work visibly. Do not immediately retry the same exhausted run without new input or an explicit retry. Use Pi's existing context management and record the model server's effective context settings during evaluation.
 
+**RUN-03 — Durable clarification (T01).** A clarification records its question, suggested choices, relevant work and source versions, and pending/answered/superseded state outside Pi session history. Persist it and end the current run at a safe boundary; do not continue later proposed tools or claim the dependent work complete. Only dependent work waits. Terminal and optional Telegram answers target the same request and are accepted once. Save the answer and continuation before acknowledging it. Reconcile changed context before accepting or using an answer, supersede obsolete requests, and continue through a fresh bounded run. New accepted input invalidates cached reasoning even when file bytes are unchanged. Answers received while paused remain durable but do not resume automatic work. Questions have no guessed default or automatic expiry. [TG-06–07](telegram-v1.md#2-results-questions-and-feedback) define the interaction and recovery details.
+
 **ACT-01 — Preview.** An action proposal names its operation, sources, explanation, and preconditions. Previewing changes no user files. An explanation is a short account of evidence and intended benefit; it is not a dump of hidden reasoning.
 
 **ACT-02 — Allowed effects.** v1 can move or rename individual regular files within the root, create necessary subdirectories, and create new UTF-8 Markdown, text, or JSON artifacts. JSON outputs must parse. Preserve user-created directory names. Destination paths must not already exist. A revised report is a new artifact with a new path; internal state identifies the current result.
 
-Overwriting existing files, deleting user files, renaming user-created directories, and acting in external applications are outside v1's automatic authority. v1 exposes no tools that perform those operations. Future support requires explicit authorization and a separate specification.
+Overwriting existing files, deleting user files, renaming user-created directories, and general actions in external applications are outside v1's automatic authority. v1 exposes no tools that perform those operations. The optional Telegram adapter may deliver messages and verified generated files only as authorized by its separate contract; it exposes no arbitrary-send tool and cannot upload original sources. Other external actions require explicit authorization and a separate specification.
 
 **ACT-03 — Preconditions.** Before each mutation, validate the current source version, source location, source evidence freshness, destination, path containment, and applicable corrections. Resolve paths safely and reject traversal through symlinks. Use exclusive creation and a no-clobber move operation; an overwrite-capable rename by itself is insufficient. If a safe operation is unavailable, refuse it rather than substituting an unsafe copy/delete sequence.
 
@@ -66,7 +70,7 @@ On restart, reconcile prepared actions against their recorded before/after state
 
 **ACT-06 — No feedback loop.** Match Foldy's own writes to journal entries and update the inventory without scheduling the same work again. Do not ignore generated files wholesale: external changes to them are new input. Reconsider an old action only when relevant evidence or explicit user intent changes.
 
-**ACT-07 — Autonomy.** Until chunk 09, mutations require explicit `apply` commands. After chunk 08's safety checks pass, `watch` may automatically execute permitted actions. Default automatic authority remains confined to organizing and creating within the root.
+**ACT-07 — Autonomy.** Until chunk 09, mutations require explicit `apply` commands. After chunk 08's safety checks pass, `watch` may automatically execute permitted actions. Default automatic file authority remains confined to organizing and creating within the root. Telegram pairing, feedback, and clarification answers do not bring file-mutation authority forward or expose remote apply/undo controls.
 
 ## 5. User controls
 
@@ -84,16 +88,23 @@ The foreground watcher accepts:
 | `status` | Show observation, pending/running work, errors, stale findings/artifacts, and conflicts. |
 | `ask <text>` | Answer using current shared context and source references. This is read-only with respect to user files. |
 | `explain <finding-or-action-id>` | Show the claim/action, supporting evidence, freshness, and applicable corrections. |
-| `correct <finding-or-action-id\|folder> <text>` | Record a targeted correction or an explicit folder instruction and re-evaluate affected conclusions. Use `folder` to answer a clarification that has no finding/action target. |
+| `correct <finding-or-action-id\|folder> <text>` | Record a targeted correction or an explicit folder instruction and re-evaluate affected conclusions. From T01, use `answer` to resolve a particular pending clarification; a folder instruction does not implicitly select one. |
+| `questions` (T01) | List current pending clarifications with terminal identifiers and readable questions. Works without Telegram. |
+| `answer <question-id> <text>` (T01) | Persist one targeted clarification answer under RUN-03. Works without Telegram. |
 | `plan` | Produce or refresh action proposals without applying them. |
 | `apply <action-id>` | Explicitly apply one permitted proposal after rechecking preconditions. |
 | `undo <action-id>` | Attempt the safe reversal defined by ACT-05. |
 | `pause` | Stop automatic reasoning and new file mutations; continue observation. Acknowledge once any current mutation reaches a durable safe boundary. |
 | `resume` | Reconcile, then resume pending automatic work. |
-| `retry` | Re-attempt incomplete work against current source versions. |
+| `retry` | Re-attempt incomplete work against current source versions; from T01, also requeue eligible failed deliveries without repeating local effects. |
 | `quit` | Stop accepting work, cancel model work, settle any current journaled operation, and exit. |
+| `telegram pair` (T01) | With a configured bot token, issue a single-use pairing link for this root. |
+| `telegram status` (T01) | Show connection state, notification mode, and delivery problems without secrets. |
+| `telegram disconnect` (T01) | Revoke the binding and cancel its undelivered messages while preserving local knowledge and pending work. |
 
 Read-only questions and explanations remain available while paused. File mutations, including explicit `apply` and `undo`, require resuming first. Queue conflicting commands instead of creating concurrent writer loops. v1 does not require another process, an IPC server, or a web service for these controls.
+
+The [messaging contract](telegram-v1.md) uses CopilotKit Channels for optional personal-chat results, contextual feedback, native choice buttons, and basic controls, with Telegram first. Its All / Needs attention / Silent preference controls notification sound; generated attachments continue to arrive silently when muted. T01 follows chunk 06, and verified generated-file delivery in T02 follows chunk 08. Later providers reuse these application operations through Channels but require their own scope and checks. These controls are specified interfaces until their owning chunk is complete.
 
 ## 6. Records and trust boundaries
 
@@ -104,7 +115,9 @@ These are minimum data contracts, not a demand for a framework, class hierarchy,
 | File/version | Stable source ID, root-relative path, content fingerprint, observation time, processing status, extracted content or inspection summary |
 | Evidence reference | Source ID, content version, text/page/image or sheet/cell/range locator, and relevant excerpt or cell data when available |
 | Finding | ID, claim, observed/inferred kind, evidence references, supporting finding IDs when applicable, current/stale/rejected status, user confirmation if present |
+| Scan state | Selected model tag, recorded runtime configuration when available, and whether reasoning remains unfinished |
 | Correction | ID, target, user-authored text, time, and explicit scope; retained independently of model session compaction |
+| Clarification (T01) | ID, originating work, question/choices, target and source-version context, state, accepted answer, and durable continuation when present |
 | Action | ID, operation, paths, inputs and expected versions, reason, preconditions, proposed/prepared/applied/conflict/failed/undone status, and undo information |
 
 Store runtime state beneath `~/Library/Application Support/Foldy/<root-id>/`, where `root-id` is derived from the canonical root path. Use one SQLite database plus files needed for staging and undo. Treat a root path change as a new root in v1; do not silently attach old state to a different folder. General backup and retention management are deferred.
@@ -112,6 +125,8 @@ Store runtime state beneath `~/Library/Application Support/Foldy/<root-id>/`, wh
 Source documents, generated documents, and their extracted text are untrusted data. Disable automatic discovery of Pi project/global instructions, extensions, skills, and settings for this application; supply only the application-owned resources required by the SDK. A dropped `AGENTS.md`, `.pi` directory, script, or URL cannot register a tool, change authority, access credentials, or enable remote inference. Ordinary files with these names may be inspected as data.
 
 The model cannot write application configuration, the database, or the journal directly. Validated application tools own those operations. v1 exposes no unrestricted shell, arbitrary code execution, package installation, or external-app tools. Trusted document extraction helpers are fixed application code, not model-authored programs.
+
+The optional CopilotKit integration is application-owned communication, not a model-accessible external-app tool. Keep Telegram and Intelligence credentials and recipient bindings outside model context and source access. Received chat input is authorized only after verifying its provider, paired private chat, and user. CopilotKit's adapters, built-in tools, remote Memory, or transcript facilities do not grant additional agent authority. [TG-10](telegram-v1.md#3-controls-and-persistence) defines root-scoped application and SDK persistence; TG-14 defines the service-data boundary. Provider or Intelligence outages cannot corrupt knowledge or repeat file effects.
 
 ## 7. Acceptance scenarios
 
@@ -139,5 +154,8 @@ Each scenario ID must appear in the corresponding automated test name or live-ev
 | A18 | Given the documented 15–20-file evaluation collection, when introduced across sessions and corrected/edited, then live local-model results satisfy the semantic checks in the implementation guide. |
 | A19 | Given a multi-sheet `.xlsx` and CSV/TSV fixtures, when read, then values, sheet/cell or row/column references, hidden-sheet labels, merged ranges, and formula/cache distinctions are preserved. Missing formula results are explicit, input bytes remain unchanged, and external links or code are not executed. Relevant cells can support relationships to other files. |
 | A20 | Given neutral filenames, an image without text, and a PDF containing both text and a meaningful figure, when visually inspected, then the local model identifies the manifest's visible facts and cites the correct image/page. OCR-only output or filename inference does not pass; a text-only model reports unavailable vision. |
+| A21 | Given a durable clarification, when terminal or Telegram answers race, the watcher restarts, or its context changes, then at most one current answer schedules a fresh bounded continuation; obsolete questions cannot authorize work, and an answer while paused is retained until resume. Owned by T01. |
+
+The [Telegram acceptance scenarios](telegram-v1.md#6-acceptance-scenarios) additionally cover the optional outbound exception, identity, messages, feedback, delivery recovery, and generated attachments. Core A21 is covered alongside TG-A09–TG-A12; it is a future acceptance obligation, not current passing evidence.
 
 Deterministic tests establish boundary enforcement, state transitions, persistence, and recovery. They do not establish the model's semantic quality. Live-model results must record the actual model/runtime configuration and observed failures or limitations.

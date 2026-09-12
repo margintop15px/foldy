@@ -1,0 +1,15 @@
+
+> foldy@0.1.0 test:live
+> FOLDY_LIVE=1 node --test --test-concurrency=1 tests/live/chunk-01.live.ts
+
+✔ A02 live: two synthetic files yield valid source-backed findings through local Pi/Ollama (27086.870791ms)
+ℹ {"peakLoadedBytes":5940130609,"memorySamples":28,"memoryMetric":"Ollama /api/ps size, polled each second"}
+ℹ {"root":"/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-live-AIz5u0","observedAt":"2026-09-11T23:10:19.162Z","status":"complete","cached":false,"reasoningPending":false,"model":{"name":"qwen3.5:9b","contextWindow":16384,"digest":"6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7","ollamaVersion":"0.34.0","loadedBytes":5940130609,"capabilities":["completion","vision","tools","thinking"]},"durationMs":27070,"modelCalls":4,"toolCalls":4,"executedToolCalls":4,"files":[{"path":"notes.txt","kind":"file","status":"ready","inspected":[{"start":0,"end":130}],"size":130,"modifiedAt":"2026-09-11T23:10:19.156Z","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","sourceId":"733b576e-86a7-4892-81fb-d58d9c1f6ddc","inspection":"full"},{"path":"project.md","kind":"file","status":"ready","inspected":[{"start":0,"end":122}],"size":122,"modifiedAt":"2026-09-11T23:10:19.159Z","version":"6af0981f2534cbdaefa15d8fabddcf677875a33ccdbb8fcf070e4bcef9b2aef9","sourceId":"5a6c1c23-f8c2-4a05-b584-b6a4e8607603","inspection":"full"}],"findings":[{"id":"b14f69e7-1305-4a0c-a5a4-fb27563ebb2b","claim":"Project Lantern has a prototype review scheduled for 2026-10-15, with Mara responsible for presenting the prototype/demonstration.","kind":"observed","evidence":[{"sourceId":"733b576e-86a7-4892-81fb-d58d9c1f6ddc","path":"notes.txt","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","quote":"Mara will present the prototype at the review on 2026-10-15.","start":30,"end":90,"startLine":2,"endLine":2},{"sourceId":"5a6c1c23-f8c2-4a05-b584-b6a4e8607603","path":"project.md","version":"6af0981f2534cbdaefa15d8fabddcf677875a33ccdbb8fcf070e4bcef9b2aef9","quote":"The prototype review is scheduled for 2026-10-15.\nMara is responsible for preparing the demonstration.","start":19,"end":121,"startLine":3,"endLine":4}]},{"id":"ce0a5a22-58a0-4f9c-928d-e51a6a326df0","claim":"The team still needs to choose a room for the Project Lantern review.","kind":"observed","evidence":[{"sourceId":"733b576e-86a7-4892-81fb-d58d9c1f6ddc","path":"notes.txt","version":"f98c050914ffcdaa8143b1c925dc15bd0dc75dd346932a7fc7f6d33c85523f9e","quote":"The team still needs to choose a room.","start":91,"end":129,"startLine":3,"endLine":3}]}],"errors":[],"toolErrors":[]}
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 27547.654417

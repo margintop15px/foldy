@@ -1,0 +1,508 @@
+{
+  "version": 1,
+  "trials": 1,
+  "cases": [
+    {
+      "id": "Q05",
+      "title": "Conflicting deadlines",
+      "forbidden": [
+        "Choose one deadline as authoritative without evidence.",
+        "Infer priority from filename, arrival order or modification time."
+      ],
+      "stages": [
+        {
+          "expectedStatus": "complete",
+          "files": {
+            "notes/engineering.txt": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.\n"
+          },
+          "required": [
+            {
+              "id": "proposal",
+              "description": "Engineering proposes 2026-11-09 for OR-517; it is not a final decision.",
+              "paths": [
+                "notes/engineering.txt"
+              ],
+              "kind": "fact"
+            }
+          ]
+        },
+        {
+          "expectedStatus": "complete",
+          "files": {
+            "notes/marketing-latest.txt": "Orchard release OR-517, marketing note.\nProposed launch deadline: 2026-11-16.\nThis is a proposal, not a final decision. Neither department has decision authority.\n"
+          },
+          "required": [
+            {
+              "id": "conflict",
+              "kind": "uncertainty",
+              "description": "OR-517 has unresolved proposals of 2026-11-09 and 2026-11-16; the final date is unknown. Cite both, choose neither.",
+              "paths": [
+                "notes/engineering.txt",
+                "notes/marketing-latest.txt"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scans": [
+    {
+      "key": "Q05/1/1",
+      "caseId": "Q05",
+      "trial": 1,
+      "stage": 1,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-8lQGh7/root",
+        "observedAt": "2026-09-12T01:18:21.745Z",
+        "status": "complete",
+        "cached": false,
+        "reasoningPending": false,
+        "rebuildingKnowledge": true,
+        "analysisRevision": "8",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 45647,
+        "modelCalls": 4,
+        "toolCalls": 2,
+        "executedToolCalls": 2,
+        "agentUsage": {
+          "inputTokens": 2703,
+          "outputTokens": 1061,
+          "maxResponseTokens": 428,
+          "thinkingResponses": 4
+        },
+        "files": [
+          {
+            "path": "notes",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 96,
+            "modifiedAt": "2026-09-12T01:18:21.341Z",
+            "sourceId": "4f7a6ea7-d263-482e-b847-1f397f1cdb6d",
+            "inspection": "none"
+          },
+          {
+            "path": "notes/engineering.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 122
+              }
+            ],
+            "size": 122,
+            "modifiedAt": "2026-09-12T01:18:21.341Z",
+            "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+            "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "0349a7db-b42d-494e-b208-18619f795156",
+            "claim": "Orchard release OR-517 is proposed with a launch deadline of 2026-11-09, but this remains a proposal and not yet a final decision.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+                "path": "notes/engineering.txt",
+                "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+                "quote": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.",
+                "start": 0,
+                "end": 121,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 8,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 46101,
+      "traceFile": "Q05-1-1.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    },
+    {
+      "key": "Q05/1/2",
+      "caseId": "Q05",
+      "trial": 1,
+      "stage": 2,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-8lQGh7/root",
+        "observedAt": "2026-09-12T01:19:08.917Z",
+        "status": "complete",
+        "cached": false,
+        "reasoningPending": false,
+        "rebuildingKnowledge": false,
+        "analysisRevision": "8",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 64919,
+        "modelCalls": 4,
+        "toolCalls": 3,
+        "executedToolCalls": 3,
+        "agentUsage": {
+          "inputTokens": 4201,
+          "outputTokens": 1462,
+          "maxResponseTokens": 503,
+          "thinkingResponses": 4
+        },
+        "files": [
+          {
+            "path": "notes",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 128,
+            "modifiedAt": "2026-09-12T01:19:07.449Z",
+            "sourceId": "4f7a6ea7-d263-482e-b847-1f397f1cdb6d",
+            "inspection": "none"
+          },
+          {
+            "path": "notes/engineering.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 122
+              }
+            ],
+            "size": 122,
+            "modifiedAt": "2026-09-12T01:18:21.341Z",
+            "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+            "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+            "inspection": "full"
+          },
+          {
+            "path": "notes/marketing-latest.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 163
+              }
+            ],
+            "size": 163,
+            "modifiedAt": "2026-09-12T01:19:07.449Z",
+            "version": "e67786686321326f41cdc17d94a6ea473d01c55c3bc4938c49846d3cd78f9f41",
+            "sourceId": "c51ff2bb-c9ed-4ce9-8863-25cc8bad2599",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "0349a7db-b42d-494e-b208-18619f795156",
+            "claim": "Orchard release OR-517 is proposed with a launch deadline of 2026-11-09, but this remains a proposal and not yet a final decision.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+                "path": "notes/engineering.txt",
+                "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+                "quote": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.",
+                "start": 0,
+                "end": 121,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "3a3a2933-5e71-499a-9380-ba2784988378",
+            "claim": "Orchard release OR-517 is proposed with two different launch deadlines: engineering proposes 2026-11-09 while marketing proposes 2026-11-16. Both documents state these are proposals, not final decisions, and neither department has decision authority.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "c51ff2bb-c9ed-4ce9-8863-25cc8bad2599",
+                "path": "notes/marketing-latest.txt",
+                "version": "e67786686321326f41cdc17d94a6ea473d01c55c3bc4938c49846d3cd78f9f41",
+                "quote": "Orchard release OR-517, marketing note.\nProposed launch deadline: 2026-11-16.\nThis is a proposal, not a final decision. Neither department has decision authority.",
+                "start": 0,
+                "end": 162,
+                "startLine": 1,
+                "endLine": 3
+              },
+              {
+                "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+                "path": "notes/engineering.txt",
+                "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+                "quote": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.",
+                "start": 0,
+                "end": 121,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 8,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 66402,
+      "traceFile": "Q05-1-2.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    },
+    {
+      "key": "Q05/1/3",
+      "caseId": "Q05",
+      "trial": 1,
+      "stage": 3,
+      "report": {
+        "root": "/private/var/folders/sz/zk26spy53sjfkx0gq43whdyh0000gn/T/foldy-benchmark-8lQGh7/root",
+        "observedAt": "2026-09-12T01:20:14.984Z",
+        "status": "complete",
+        "cached": true,
+        "reasoningPending": false,
+        "rebuildingKnowledge": false,
+        "analysisRevision": "8",
+        "model": {
+          "name": "qwen3.5:9b",
+          "contextWindow": 16384,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "ollamaVersion": "0.34.0",
+          "loadedBytes": 5940130609,
+          "capabilities": [
+            "completion",
+            "vision",
+            "tools",
+            "thinking"
+          ],
+          "reasoningEffort": "low"
+        },
+        "durationMs": 12,
+        "modelCalls": 0,
+        "toolCalls": 0,
+        "executedToolCalls": 0,
+        "agentUsage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "maxResponseTokens": 0,
+          "thinkingResponses": 0
+        },
+        "files": [
+          {
+            "path": "notes",
+            "kind": "directory",
+            "status": "ready",
+            "inspected": [],
+            "size": 128,
+            "modifiedAt": "2026-09-12T01:19:07.449Z",
+            "sourceId": "4f7a6ea7-d263-482e-b847-1f397f1cdb6d",
+            "inspection": "none"
+          },
+          {
+            "path": "notes/engineering.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 122
+              }
+            ],
+            "size": 122,
+            "modifiedAt": "2026-09-12T01:18:21.341Z",
+            "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+            "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+            "inspection": "full"
+          },
+          {
+            "path": "notes/marketing-latest.txt",
+            "kind": "file",
+            "status": "ready",
+            "inspected": [
+              {
+                "start": 0,
+                "end": 163
+              }
+            ],
+            "size": 163,
+            "modifiedAt": "2026-09-12T01:19:07.449Z",
+            "version": "e67786686321326f41cdc17d94a6ea473d01c55c3bc4938c49846d3cd78f9f41",
+            "sourceId": "c51ff2bb-c9ed-4ce9-8863-25cc8bad2599",
+            "inspection": "full"
+          }
+        ],
+        "findings": [
+          {
+            "id": "0349a7db-b42d-494e-b208-18619f795156",
+            "claim": "Orchard release OR-517 is proposed with a launch deadline of 2026-11-09, but this remains a proposal and not yet a final decision.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+                "path": "notes/engineering.txt",
+                "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+                "quote": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.",
+                "start": 0,
+                "end": 121,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          },
+          {
+            "id": "3a3a2933-5e71-499a-9380-ba2784988378",
+            "claim": "Orchard release OR-517 is proposed with two different launch deadlines: engineering proposes 2026-11-09 while marketing proposes 2026-11-16. Both documents state these are proposals, not final decisions, and neither department has decision authority.",
+            "kind": "observed",
+            "evidence": [
+              {
+                "sourceId": "c51ff2bb-c9ed-4ce9-8863-25cc8bad2599",
+                "path": "notes/marketing-latest.txt",
+                "version": "e67786686321326f41cdc17d94a6ea473d01c55c3bc4938c49846d3cd78f9f41",
+                "quote": "Orchard release OR-517, marketing note.\nProposed launch deadline: 2026-11-16.\nThis is a proposal, not a final decision. Neither department has decision authority.",
+                "start": 0,
+                "end": 162,
+                "startLine": 1,
+                "endLine": 3
+              },
+              {
+                "sourceId": "5e88e7a5-a5df-404b-8f42-b5db3bef0e78",
+                "path": "notes/engineering.txt",
+                "version": "3d7b4acbd873c4eca5994c28dbb6ee58eb1634186517061292fcb24e5f7f44f1",
+                "quote": "Orchard release OR-517, engineering note.\nProposed launch deadline: 2026-11-09.\nThis is a proposal, not a final decision.",
+                "start": 0,
+                "end": 121,
+                "startLine": 1,
+                "endLine": 3
+              }
+            ]
+          }
+        ],
+        "errors": [],
+        "toolErrors": []
+      },
+      "networkRequests": 0,
+      "exitCode": 0,
+      "signal": null,
+      "stderr": "",
+      "wallMs": 1145,
+      "traceFile": "Q05-1-3.jsonl",
+      "sourceBytesUnchanged": true,
+      "issues": []
+    }
+  ],
+  "finished": true,
+  "manifest": {
+    "startedAt": "2026-09-12T01:18:21.309Z",
+    "command": [
+      "/Users/usuario/Projects/foldy/tests/quality/run.ts",
+      "--out",
+      "benchmarks/runs/2026-09-12-citation-guidance/Q05",
+      "--trials",
+      "1",
+      "--case",
+      "Q05"
+    ],
+    "commit": "6043bbb6b22ee13a8942e9b6026ab9dace860505",
+    "gitStatus": " M .gitignore\n M README.md\n M package.json\n M specs/README.md\n M specs/foldy-v1.md\n M specs/implementation.md\n M src/inventory.ts\n M src/model.ts\n M src/scan.ts\n M tests/chunk-01.test.ts\n M tests/live/chunk-01.live.ts\n?? benchmarks/\n?? specs/quality-evaluation.md\n?? specs/telegram-v1.md\n?? src/store.ts\n?? tests/chunk-02.test.ts\n?? tests/fixtures/cross-file/\n?? tests/helpers.ts\n?? tests/live/chunk-02.live.ts\n?? tests/quality.test.ts\n?? tests/quality/\n?? tests/support/",
+    "patchHash": "a8938df717125a3824d6cac774a6df3f7e15f2d8ceec8a64a55a4d9f54689205",
+    "codeFiles": {
+      "package-lock.json": "4e427e4f4ed3bdc64d29a07f2e024524c446d5914c525207c9296dcf3294c10a",
+      "package.json": "675b89fb5f04790df8b24b06082fda044ffe8cd65217d8660e9021f8f15ec99e",
+      "src/cli.ts": "f6b6430ebb619416346e70c2cd08a384fce7370a2ecb4294b0aa22cd56f6735b",
+      "src/inventory.ts": "c4dad8389abda42c6b7568132958d9791411bf7c06218225984af45033bcfbfe",
+      "src/model.ts": "0aa410ab4cfe1be3faabbda98d84e85d4d8ac32354e063ef956c4f1f795863d5",
+      "src/scan.ts": "24f83ccb41bfa07330c3be4f315d07b702fd351f0173f800f6c2580d9af5d1a4",
+      "src/store.ts": "6245553cf8803cd12ea0966156540908258a2bb514186d50636ad8ffb9a33511",
+      "tests/helpers.ts": "c45b5dc3022e1c0de0da949e228d17dab4bad1156efa4c6f2433c86675da86ec",
+      "tests/quality.test.ts": "4b2a693d9c9ae288edb1f536d66b0692249ee5429aa42047a871487d132d9dc4",
+      "tests/quality/cases.ts": "943b0dc11c1a3a4b83d38bac7d3a0c443a6fcd9370727e189de745449edb36fd",
+      "tests/quality/harness.ts": "cc51777ebfe154ece207bd018f4b3347c39e21b3656d68c142ad0ab17b33c473",
+      "tests/quality/run.ts": "8196c6f4d8d45edd29c17c0893e11e32d31d9081d67c81e22ef22dd09401018d",
+      "tests/quality/scan-process.ts": "04fd1ad838987f0040ff8eae30686baa3858b1cb4bbf303fdd162de7f9d25115",
+      "tests/quality/score.ts": "25eaba2fa4513fd828607ff4bc19482b88a8b13ee128153403e90976f077bfdd",
+      "tsconfig.json": "71b56d916cfbcc560b353e39c3ca2ae48f23a94716067ac35b46b99eb829e723"
+    },
+    "casesHash": "806872c6f94e31039f48a5f4be051737a4c98c9af25c8fab4965a7c203b2c92a",
+    "promptHash": "18713d7d3c569370d97ab1910d12c4b4fc292bb5bcad96de01ccad9f3f6d8fb4",
+    "modelTag": "qwen3.5:9b",
+    "modelBefore": {
+      "models": [
+        {
+          "name": "qwen3.5:9b",
+          "model": "qwen3.5:9b",
+          "size": 5940130609,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+          "details": {
+            "parent_model": "",
+            "format": "gguf",
+            "family": "qwen35",
+            "families": [
+              "qwen35"
+            ],
+            "parameter_size": "9.7B",
+            "quantization_level": "Q4_K_M"
+          },
+          "expires_at": "2026-09-12T03:23:09.320367+02:00",
+          "size_vram": 5940130609,
+          "context_length": 16384
+        }
+      ]
+    },
+    "node": "v24.19.0",
+    "sqlite": "3.53.3",
+    "hardware": {
+      "platform": "darwin",
+      "release": "25.6.0",
+      "arch": "arm64",
+      "cpu": "Apple M4 Pro",
+      "memoryBytes": 25769803776
+    },
+    "settings": {
+      "temperature": 0,
+      "maxOutputTokens": 2048,
+      "maxTokensField": "max_tokens",
+      "reasoningEffort": "low when supported; per-scan model records the selected mode",
+      "retries": 0,
+      "maxToolCalls": 20,
+      "maxRunMs": 300000,
+      "compaction": {
+        "reserveTokens": 2048,
+        "keepRecentTokens": 2048
+      }
+    },
+    "protocol": "Fresh process per scan; fresh root/state per trial; two stages then unchanged cache probe with network denied. Serial, no retries. Tool traces exclude model reasoning. Per-scan model metadata records actual runtime/digest/context.",
+    "finishedAt": "2026-09-12T01:20:15.007Z"
+  }
+}

@@ -1,6 +1,6 @@
 # Foldy
 
-Status: chunk 01 is implemented and verified. Chunks 02–09 remain unimplemented. See [setup and run commands](../README.md).
+Status: chunks 01–02 are implemented and verified. Chunks 03–09 remain unimplemented. Telegram T01–T02 are specified but unimplemented. See [setup and run commands](../README.md).
 
 ## Purpose
 
@@ -26,7 +26,9 @@ For a proposed addition, ask: which current requirement or failing test needs th
 ## Read and execute
 
 - [Behavioral specification](foldy-v1.md): authoritative v1 behavior, boundaries, interfaces, and acceptance scenarios.
+- [Messaging specification — Telegram first](telegram-v1.md): CopilotKit Channels foundation, personal-chat results, generated attachments, clarification choices, feedback, settings, and acceptance scenarios.
 - [Implementation chunks](implementation.md): ordered, independently verifiable work with run commands and completion evidence.
+- [Output quality evaluation](quality-evaluation.md): executable six-case benchmark, scoring rules, and the recorded 54-scan baseline; the quality gate is not yet met.
 
 Here, **executable specification** means an engineer or agent can implement a chunk and check its result against explicit scenarios. Markdown is the source of intent. The implementation supplies the runnable commands and tests; there is no custom specification parser or test DSL.
 
@@ -39,8 +41,15 @@ Behavioral requirements take precedence over implementation suggestions. A chang
 | First user and platform | One user on macOS; initial evaluation on an M4 Pro with 24 GB memory |
 | First release | Folder intelligence, cross-file context, persistent corrections, reversible organization, and simple generated files |
 | Input formats | Text/Markdown, CSV/TSV, Excel `.xlsx`, text and scanned PDFs, PNG/JPEG images |
-| Interaction | Terminal commands and a foreground watcher |
-| Autonomy | Automatically organize and create within the selected folder; overwrites, deletions, and external actions are outside automatic authority |
+| Interaction | Terminal commands and a foreground watcher; CopilotKit Channels handles messaging, with one paired private Telegram user chat per root initially |
+| Messaging foundation | CopilotKit Channels, its direct Telegram adapter, CopilotRuntime, and the required Intelligence service connection; pin compatible packages when T01 is implemented |
+| Later messengers | Add provider integrations through the same Channels boundary and Foldy operations after Telegram; only Telegram is registered initially |
+| Messaging data | Pi/Ollama inference and authoritative state remain local. Required Intelligence coordination and user-facing messaging/UI data are allowed; optional remote Memory/transcript export is disabled |
+| Autonomy | Automatically organize and create within the selected folder; Telegram does not expose apply/undo or expand file authority. Overwrites, deletions, and other external actions remain outside automatic authority |
+| Telegram content | Useful result messages and questions; generated files delivered as attachments after verified creation. Original source attachments stay local; internal IDs and diagnostics stay out of chat |
+| Telegram feedback | Native single-select clarification choices and custom replies; contextual feedback becomes a targeted persistent correction |
+| Telegram settings | Pause/resume, All / Needs attention / Silent notification sound, connection status, and disconnect. Muting sound preserves message and attachment delivery |
+| Telegram delivery order | T01 after chunk 06 for chat and shared clarification; T02 after chunk 08 for safe generated-file delivery. First deliverable is specifications only |
 | Foundation | TypeScript, Node.js 24, Pi SDK, Ollama, Chokidar, SQLite |
 | Initial model | Local `qwen3.5:9b` as the vision-capable baseline; validate quality and record effective context settings on the target machine |
 | Model candidate | Evaluate MiniCPM5-2B for text reasoning and tool use; its text-only checkpoint cannot satisfy v1's image requirements alone |
@@ -57,23 +66,27 @@ Keep one model per run. A text-only candidate is eligible for text experiments; 
 
 ## Progress
 
-Commands for chunk 01 are runnable. Later commands remain target interfaces until their owning chunk is implemented.
+Commands for chunks 01–02 are runnable. Later commands remain target interfaces until their owning chunk is implemented.
 
 | Chunk | Outcome | Status |
 | --- | --- | --- |
 | 01 | Read a folder | Complete; offline checks and live Qwen check pass |
-| 02 | Remember and connect | Not started |
+| 02 | Remember and connect | Complete; persistence, offline checks, and live cross-session Qwen check pass |
 | 03 | Understand images and PDFs | Not started |
 | 04 | Read spreadsheets | Not started |
 | 05 | React to changes | Not started |
 | 06 | Explain and accept corrections | Not started |
+| T01 | CopilotKit foundation and Telegram conversation | Specified; not started; follows 06 |
 | 07 | Preview useful actions | Not started |
 | 08 | Apply and undo safely | Not started |
+| T02 | Telegram generated attachments | Specified; not started; requires T01 and 08 |
 | 09 | Enable bounded autonomy | Not started |
+
+Messaging is optional: core operation continues without integration credentials or pairing. T01 and T02 have their own offline and explicitly enabled live-bot evidence gates, including CopilotKit lifecycle, persistence, proactive delivery, and service-data checks. Their planned commands are not available in the current scanner.
 
 ## Deferred work
 
-The longer-term direction remains an agent that improves through reusable skills and small tools while a stable application core enforces its authority. Later work may add sandboxed generated scripts, creation of expense workbooks and charts, meme composition or image generation, expiry reminders and calendar integration, richer retrieval, and desktop packaging. Reading supported spreadsheet files is already part of v1.
+The longer-term direction remains an agent that improves through reusable skills and small tools while a stable application core enforces its authority. After Telegram, further messenger integrations use CopilotKit Channels with separate provider requirements and verification; those adapters are not enabled in T01/T02. Later work may also add sandboxed generated scripts, creation of expense workbooks and charts, meme composition or image generation, expiry reminders and calendar integration, richer retrieval, and desktop packaging. Reading supported spreadsheet files is already part of v1.
 
 These are examples of capabilities, not predefined workflows for the model. Each needs its own small specification and acceptance evidence before implementation. Model-weight training and automatic modification of the permission-enforcement core are not part of v1.
 
@@ -89,4 +102,5 @@ References checked during the design discussion on 2026-09-11. Pin dependency ve
 - [ExcelJS](https://github.com/exceljs/exceljs): local `.xlsx` and delimited-text reading, with stored formula results rather than formula recalculation.
 - [Chokidar](https://github.com/paulmillr/chokidar): watching, atomic saves, and write-settling behavior.
 - [SQLite full-text search](https://www.sqlite.org/fts5.html).
+- [CopilotKit Channels direct adapters](https://docs.copilotkit.ai/reference/channels/sdk/direct-adapters): chosen on 2026-09-12 for Telegram first and later messengers; the Intelligence lifecycle dependency also applies to direct adapters.
 - [Hermes](https://docs.ollama.com/integrations/hermes) and [Goose](https://goose-docs.ai/): considered alternatives; v1 uses Pi.
