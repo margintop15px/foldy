@@ -7,25 +7,26 @@ import type { Finding } from "./store.ts";
 import { createScanSession, type ModelInfo, type ModelResponse, type ModelStream } from "./model.ts";
 
 export const REPORT_NAME = ".foldy.json";
+export const HTML_REPORT_NAME = ".foldy.html";
 export function isReportFile(name: string): boolean {
-  return name === REPORT_NAME || /^\.foldy\.json\.[0-9a-f-]{36}\.tmp$/.test(name);
+  return name === REPORT_NAME || name === HTML_REPORT_NAME || /^\.foldy\.(json|html)\.[0-9a-f-]{36}\.tmp$/.test(name);
 }
 
-/** Publish a complete report without exposing a partially written JSON file. */
-export async function saveReport(root: string, json: string): Promise<void> {
-  const destination = join(root, REPORT_NAME);
+/** Publish a report without exposing a partially written file. */
+export async function saveReport(root: string, content: string, name: typeof REPORT_NAME | typeof HTML_REPORT_NAME = REPORT_NAME): Promise<void> {
+  const destination = join(root, name);
   async function checkDestination() {
     const info = await lstat(destination).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== "ENOENT") throw error;
     });
-    if (info && !info.isFile()) throw new Error(".foldy.json must be a regular file, not a directory or symlink.");
+    if (info && !info.isFile()) throw new Error(`${name} must be a regular file, not a directory or symlink.`);
   }
   await checkDestination();
-  const temporary = join(root, `${REPORT_NAME}.${randomUUID()}.tmp`);
+  const temporary = join(root, `${name}.${randomUUID()}.tmp`);
   const file = await open(temporary, "wx", 0o600);
   try {
     try {
-      await file.writeFile(json, "utf8");
+      await file.writeFile(content, "utf8");
       await file.sync();
     } finally { await file.close(); }
     await checkDestination();

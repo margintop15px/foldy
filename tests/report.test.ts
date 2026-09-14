@@ -8,7 +8,7 @@ import { beforeEach, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { inventoryFolder, type Source } from "../src/inventory.ts";
-import { FILE_REPORT_PROMPT, fileReportEvidence, flatReport, generateFileReport, saveReport } from "../src/report.ts";
+import { FILE_REPORT_PROMPT, HTML_REPORT_NAME, fileReportEvidence, flatReport, generateFileReport, saveReport } from "../src/report.ts";
 import { scan } from "../src/scan.ts";
 import type { Finding, TextEvidence } from "../src/store.ts";
 import { finding, fixture, read, scripted } from "./helpers.ts";
@@ -55,8 +55,14 @@ test("A01: report destinations reject symlinks/directories and exclude only root
   await mkdir(join(root, "nested", ".foldy.json"));
   await assert.rejects(saveReport(join(root, "nested"), "{}"), /regular file/);
   await writeFile(join(root, ".foldy.json.00000000-0000-0000-0000-000000000000.tmp"), "partial");
+  await symlink(target, join(root, HTML_REPORT_NAME));
+  await assert.rejects(saveReport(root, "<html></html>", HTML_REPORT_NAME), /regular file/);
+  assert.equal(await readFile(target, "utf8"), "original");
+  await mkdir(join(root, "nested", HTML_REPORT_NAME));
+  await assert.rejects(saveReport(join(root, "nested"), "<html></html>", HTML_REPORT_NAME), /regular file/);
+  await writeFile(join(root, ".foldy.html.00000000-0000-0000-0000-000000000000.tmp"), "partial");
   const inventory = await inventoryFolder(root, new AbortController().signal);
-  assert.deepEqual(inventory.sources.map(item => item.path), ["nested", "nested/.foldy.json"]);
+  assert.deepEqual(inventory.sources.map(item => item.path), ["nested", "nested/.foldy.html", "nested/.foldy.json"]);
 });
 
 test("CLI stores exactly stdout, including incomplete reports, and reports save failures", async t => {
@@ -151,8 +157,21 @@ test("MD5 metadata hashes original text and binary bytes while SHA-256 versions 
 });
 
 const cli = fileURLToPath(new URL("../src/cli.ts", import.meta.url));
-function runCli(args: string[], stateDir: string) {
-  const blockNetwork = `data:text/javascript,${encodeURIComponent('globalThis.fetch = () => { throw new Error("Offline CLI test made a network request."); };')}`;
+function runCli(args: string[], stateDir: string, browserFails = false) {
+  const bootstrap = `
+    import childProcess from "node:child_process";
+    import { appendFileSync, readFileSync } from "node:fs";
+    import { syncBuiltinESMExports } from "node:module";
+    globalThis.fetch = () => { throw new Error("Offline CLI test made a network request."); };
+    childProcess.execFile = (command, args, callback) => {
+      if (command !== "open") throw new Error("Unexpected command: " + command);
+      if (!readFileSync(args[0], "utf8").includes('id="foldy-report"')) throw new Error("HTML must be saved before opening.");
+      appendFileSync(${JSON.stringify(join(stateDir, "browser.jsonl"))}, JSON.stringify({ command, args }) + "\\n");
+      callback(${browserFails ? 'new Error("Browser unavailable")' : "null"}, "", "");
+    };
+    syncBuiltinESMExports();
+  `;
+  const blockNetwork = `data:text/javascript,${encodeURIComponent(bootstrap)}`;
   const result = spawnSync(process.execPath, ["--import", blockNetwork, cli, ...args], {
     encoding: "utf8", timeout: 15_000,
     env: { ...process.env, OPENAI_API_KEY: "", FOLDY_PROVIDER: "openai", FOLDY_MODEL: "gpt-4.1-mini", FOLDY_STATE_DIR: stateDir },
@@ -182,6 +201,8 @@ test("CLI reports: first flat request generates distinct prose; subsequent full 
     assert.deepEqual(report.files, seeded.files);
     assert.deepEqual(report.findings, seeded.findings);
   }
+  assert.ok(!(await readdir(root)).includes(HTML_REPORT_NAME));
+  assert.ok(!(await readdir(stateDir)).includes("browser.jsonl"));
   const prose = { abstract: "The note requests a reservation for room Cedar. It does not confirm a completed booking.",
     summary: "A request to reserve room Cedar." };
   const generated = await scan(root, { stateDir, provider: "openai", model: "gpt-4.1-mini", generateFileReports: true,
@@ -204,11 +225,28 @@ test("CLI reports: first flat request generates distinct prose; subsequent full 
   assert.match(result.stderr, /OpenAI mode selected/);
   assert.deepEqual(JSON.parse(result.stdout), [{ filePath: path, fileType: "text",
     fileHash: createHash("md5").update(text).digest("hex"), ...prose }]);
+  const html = await readFile(join(root, HTML_REPORT_NAME), "utf8");
+  assert.match(html, /A request to reserve room Cedar\./);
+  assert.deepEqual(JSON.parse(await readFile(join(stateDir, "browser.jsonl"), "utf8")),
+    { command: "open", args: [join(root, HTML_REPORT_NAME)] });
+  const browserFailure = runCli(["scan", root, "--report", "flat"], stateDir, true);
+  assert.equal(browserFailure.status, 0, browserFailure.stderr);
+  assert.equal(browserFailure.stdout, result.stdout);
+  assert.match(browserFailure.stderr, /Could not open the browser: Browser unavailable/);
   const cached = await scan(root, { stateDir, provider: "openai", model: "gpt-4.1-mini", generateFileReports: true,
     stream: scripted(() => { assert.fail("A cached report must not contact the model."); }) });
   assert.equal(cached.cached, true);
   assert.equal(cached.modelCalls, 0);
   assert.deepEqual(cached.fileReports, generated.fileReports);
+  assert.ok(!cached.files.some(file => file.path === HTML_REPORT_NAME));
+  const opened = await readFile(join(stateDir, "browser.jsonl"), "utf8");
+  await unlink(join(root, HTML_REPORT_NAME));
+  await mkdir(join(root, HTML_REPORT_NAME));
+  const saveFailure = runCli(["scan", root, "--report", "flat"], stateDir);
+  assert.equal(saveFailure.status, 1, saveFailure.stderr);
+  assert.match(saveFailure.stderr, /\.foldy.html must be a regular file/);
+  assert.equal(await readFile(join(root, ".foldy.json"), "utf8"), saveFailure.stdout);
+  assert.equal(await readFile(join(stateDir, "browser.jsonl"), "utf8"), opened);
 });
 
 test("File reports reject malformed or empty text and retry reporting without repeating scan reasoning", async t => {

@@ -16,7 +16,7 @@ npm run foldy -- scan ./tests/fixtures/text
 
 Replace the fixture path with the folder to inspect. The result is JSON containing the inventory, inspection coverage, current findings, and errors. Exit codes: `0` for complete inspection, `2` for incomplete inspection, and `1` for a failed run.
 
-The CLI saves exactly the selected JSON report printed on stdout to `<canonical-root>/.foldy.json`, including cached, incomplete and failed reports. The full format includes all current accumulated findings. SQLite continues to provide incremental analysis and caching; writing the JSON does not trigger another analysis. The report and reserved `.foldy.json.<uuid>.tmp` files are excluded from the root inventory. The library `scan()` itself does not write this export.
+The CLI saves exactly the selected JSON report printed on stdout to `<canonical-root>/.foldy.json`, including cached, incomplete and failed reports. The full format includes all current accumulated findings. SQLite continues to provide incremental analysis and caching; writing the JSON does not trigger another analysis. The `.foldy.json` and `.foldy.html` reports and their reserved `.<uuid>.tmp` files are excluded from the root inventory. The library `scan()` itself does not write these exports.
 
 Reports are written through an exclusive temporary file and atomic rename. Exceptions before a report is returned leave the previous export intact; a save failure exits with code `1`. Symlink and directory destinations are rejected. The full format includes `status`, `reasoningPending` and `observedAt` for checking the export later. Only current findings are exported; history remains in SQLite.
 
@@ -25,6 +25,8 @@ Use `--report flat` for a JSON array with one entry per regular file:
 ```sh
 npm run foldy -- scan ./documents --report flat
 ```
+
+After saving a flat report, the CLI fills the Folder Overview template from `.foldy.json`, writes `.foldy.html` beside it, and opens it in the default browser on macOS. This also works for cached and partial results. The page includes folder groups, text and file-type filters, and expandable abstracts. Data and `support.js` are embedded in the HTML; the supplied template runtime loads React from unpkg and fonts from Google Fonts, so viewing it requires an internet connection. Browser-opening failures leave the HTML available to open manually and preserve the scan exit code. HTML save failures exit with code `1`; the saved JSON remains available. Diagnostics and the HTML path go to stderr, keeping stdout as JSON.
 
 ```ts
 {
@@ -111,6 +113,6 @@ For text and document quality, run `npm run bench -- --suite all --out benchmark
 - `agentUsage` reports token counts for ordinary agent turns and the largest response. `inputTokens` excludes separately reported prompt-cache reads/writes. The counters exclude separate Pi compaction and Ollama preflight calls; `durationMs` covers the whole scan.
 - Shared context uses a bounded overview and literal SQLite text search, with ten-result pages and 240-character snippets. Search does not count as inspection. There is no vector index or accumulated Pi conversation.
 - Cache invalidation uses the selected provider, model tag and Foldy's analysis revision. Changing the weights behind an unchanged model tag is not detected by a cached scan. Historical state has no retention policy or user-facing history command yet.
-- No watcher, user corrections, file organization, or generated artifacts yet. macOS is the supported initial platform.
+- No watcher, user corrections, or file organization yet. macOS is the supported initial platform.
 
 See the [behavioral specification](specs/foldy-v1.md), [implementation chunks and evidence](specs/implementation.md), and [design decisions](specs/README.md). KISS governs the next chunk too.

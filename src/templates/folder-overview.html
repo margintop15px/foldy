@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foldy — Folder overview</title>
+<!--FOLDY_SUPPORT-->
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #f7f6f3; }
+  a { color: #2f5d50; text-decoration: none; }
+  a:hover { color: #1c1a17; text-decoration: underline; }
+  input { font-family: inherit; }
+  ::selection { background: #dbe7e2; }
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f7f6f3;color:#1c1a17;font-family:'Work Sans',Helvetica,sans-serif;padding:56px 32px 96px;box-sizing:border-box;overflow-wrap:anywhere;">
+  <div style="max-width:860px;margin:0 auto;">
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;border-bottom:1px solid #dedad2;padding-bottom:20px;">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#8a8378;margin-bottom:10px;">Folder overview</div>
+        <h1 style="font-family:Newsreader,Georgia,serif;font-weight:400;font-size:40px;line-height:1.1;margin:0;letter-spacing:-0.01em;">{{ folderName }}</h1>
+      </div>
+      <div style="display:flex;gap:28px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#6f6a62;">
+        <div><span style="color:#1c1a17;font-size:20px;">{{ countFiles }}</span> files</div>
+        <div><span style="color:#1c1a17;font-size:20px;">{{ countFolders }}</span> folders</div>
+        <div><span style="color:#1c1a17;font-size:20px;">{{ countTypes }}</span> types</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:20px 0 28px;">
+      <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Filter by name or content…" style="flex:1 1 240px;min-width:0;padding:10px 14px;border:1px solid #dedad2;border-radius:2px;background:#fffefb;font-size:14px;color:#1c1a17;outline:none;" style-focus="border-color:#2f5d50;">
+      <div style="display:flex;flex-wrap:wrap;gap:0;border:1px solid #dedad2;border-radius:2px;overflow:hidden;background:#fffefb;">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+          <button onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+        </sc-for>
+      </div>
+      <button onClick="{{ onToggleAll }}" style="padding:10px 14px;border:1px solid #dedad2;border-radius:2px;background:#fffefb;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6f6a62;cursor:pointer;" style-hover="color:#1c1a17;border-color:#b9b2a6;">{{ toggleAllLabel }}</button>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+      <div style="margin-bottom:36px;margin-left:{{ g.indent }};">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:7px 12px;background:#ece8e0;border:1px solid #dedad2;border-radius:3px;">
+          <div style="width:9px;height:9px;border-radius:1px;background:#8a8378;flex:0 0 auto;"></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.02em;color:#4a453d;">{{ g.label }}</div>
+          <div style="flex:1;height:1px;background:#d6d1c7;"></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9b9488;">{{ g.count }}</div>
+        </div>
+
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+          <div style="border:1px solid #e6e2da;background:#fffefb;border-radius:3px;margin-bottom:8px;">
+            <div onClick="{{ it.onToggle }}" style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:start;padding:18px 20px;cursor:pointer;" style-hover="background:#fdfcf8;">
+              <div style="{{ it.badgeStyle }}">{{ it.ext }}</div>
+              <div style="min-width:0;">
+                <div style="font-size:16px;font-weight:500;line-height:1.35;margin-bottom:6px;text-wrap:pretty;">{{ it.name }}</div>
+                <div style="font-size:14px;line-height:1.55;color:#5d574e;text-wrap:pretty;">{{ it.summary }}</div>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#b0a99d;padding-top:4px;">{{ it.caret }}</div>
+            </div>
+            <sc-if value="{{ it.open }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 20px 20px 20px;">
+                <div style="border-top:1px dashed #e0dbd2;padding-top:16px;display:flex;flex-direction:column;gap:14px;">
+                  <div style="font-family:Newsreader,Georgia,serif;font-size:16px;line-height:1.65;color:#332f29;text-wrap:pretty;">{{ it.abstract }}</div>
+                  <div style="display:flex;gap:20px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a8378;">
+                    <div>path &nbsp;{{ it.path }}</div>
+                    <div>hash &nbsp;{{ it.hash }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:48px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#a8a196;">No files match “{{ query }}”.</div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="application/json" id="foldy-report"><!--FOLDY_DATA--></script>
+<script type="text/x-dc" data-dc-script>
+const { files: FILES, folderName: FOLDER_NAME } = JSON.parse(document.getElementById("foldy-report").textContent);
+
+class Component extends DCLogic {
+  state = { query: "", type: "all", open: {}, allOpen: false };
+
+  ext(f) {
+    const m = f.filePath.match(/\.([a-z0-9]+)$/i);
+    return m ? m[1].toLowerCase() : (f.fileType ?? "unknown");
+  }
+
+  renderVals() {
+    const files = this.props.files ?? FILES;
+    const accent = this.props.accent ?? "#2f5d50";
+    const q = this.state.query.trim().toLowerCase();
+    const type = this.state.type;
+
+    const shown = files.filter(f => {
+      if (type !== "all" && this.ext(f) !== type) return false;
+      if (!q) return true;
+      return (f.filePath + " " + f.summary + " " + f.abstract).toLowerCase().includes(q);
+    });
+
+    const byFolder = Object.create(null);
+    shown.forEach(f => {
+      const i = f.filePath.lastIndexOf("/");
+      const folder = i === -1 ? "/" : f.filePath.slice(0, i);
+      const name = i === -1 ? f.filePath : f.filePath.slice(i + 1);
+      (byFolder[folder] = byFolder[folder] || []).push({ f, name });
+    });
+
+    const badge = (ext) => {
+      const isDoc = ext === "pdf";
+      const bg = isDoc ? "#f3e9e4" : "#e4ece9";
+      const fg = isDoc ? "#8a4a33" : accent;
+      return `display:inline-block;min-width:38px;text-align:center;padding:5px 7px;border-radius:2px;background:${bg};color:${fg};font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;`;
+    };
+
+    const groups = Object.keys(byFolder).sort().map(folder => ({
+      label: folder === "/" ? "/" : "/" + folder + "/",
+      depth: folder === "/" ? 0 : folder.split("/").length,
+      indent: folder === "/" ? "0px" : (folder.split("/").length * 18) + "px",
+      count: byFolder[folder].length + (byFolder[folder].length === 1 ? " file" : " files"),
+      items: byFolder[folder].map(({ f, name }) => {
+        const open = Object.hasOwn(this.state.open, f.filePath) && !!this.state.open[f.filePath];
+        return {
+          name,
+          path: f.filePath,
+          hash: f.fileHash?.slice(0, 10) ?? "unavailable",
+          ext: this.ext(f),
+          badgeStyle: badge(this.ext(f)),
+          summary: f.summary,
+          abstract: f.abstract,
+          open,
+          caret: open ? "[ − ]" : "[ + ]",
+          onToggle: () => this.setState(s => ({ open: { ...s.open, [f.filePath]: !open } }))
+        };
+      })
+    }));
+
+    const types = ["all", ...Array.from(new Set(files.map(f => this.ext(f))))];
+    const filters = types.map(t => ({
+      label: t,
+      style: `padding:10px 14px;border:0;border-right:1px solid #dedad2;background:${t === type ? accent : "transparent"};color:${t === type ? "#fffefb" : "#6f6a62"};font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;`,
+      onClick: () => this.setState({ type: t })
+    }));
+
+    return {
+      folderName: this.props.folderName ?? FOLDER_NAME,
+      countFiles: files.length,
+      countFolders: new Set(files.map(f => { const i = f.filePath.lastIndexOf("/"); return i === -1 ? "/" : f.filePath.slice(0, i); })).size,
+      countTypes: new Set(files.map(f => this.ext(f))).size,
+      query: this.state.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      filters,
+      groups,
+      empty: shown.length === 0,
+      toggleAllLabel: this.state.allOpen ? "collapse all" : "expand all",
+      onToggleAll: () => this.setState(s => {
+        const next = !s.allOpen;
+        const open = Object.create(null);
+        if (next) files.forEach(f => { open[f.filePath] = true; });
+        return { allOpen: next, open };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

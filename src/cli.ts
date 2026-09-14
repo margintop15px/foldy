@@ -1,8 +1,10 @@
-import { parseArgs } from "node:util";
+import { execFile } from "node:child_process";
+import { parseArgs, promisify } from "node:util";
 import { errorText } from "./inventory.ts";
 import { scan } from "./scan.ts";
 import { selectModel } from "./model.ts";
 import { flatReport, saveReport } from "./report.ts";
+import { saveOverview } from "./overview.ts";
 
 try {
   const { positionals: [command, root, ...extra], values } = parseArgs({
@@ -26,6 +28,12 @@ try {
     await saveReport(report.root, json);
     process.stdout.write(json);
     process.exitCode = report.status === "complete" ? 0 : report.status === "incomplete" ? 2 : 1;
+    if (values.report === "flat") {
+      const html = await saveOverview(report.root);
+      console.error(`Foldy: Folder overview saved to ${html}`);
+      try { await promisify(execFile)("open", [html]); }
+      catch (error) { console.error(`Foldy: Could not open the browser: ${errorText(error)}. Open ${html} manually.`); }
+    }
   } finally {
     process.removeListener("SIGINT", stop);
     process.removeListener("SIGTERM", stop);

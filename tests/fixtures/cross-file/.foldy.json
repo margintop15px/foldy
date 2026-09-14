@@ -1,0 +1,23 @@
+[
+  {
+    "filePath": "batch-1/archive/plan.md",
+    "fileHash": "6252000448783534f8f1b1fad8523733",
+    "fileType": "text",
+    "abstract": "The file titled 'plan.md' pertains to Project Lantern, identified by the project ID LTN-204. It details a scheduled prototype review led by Mara on October 15, 2026. The document specifies that the budget allocated for this review is EUR 240. These facts establish the file's focus on planning and budgeting for a specific project milestone under Mara's leadership.",
+    "summary": "The file outlines Project Lantern's prototype review led by Mara on 2026-10-15 with a budget of EUR 240."
+  },
+  {
+    "filePath": "batch-2/meetings/notes.txt",
+    "fileHash": "4ff93a3fae5a1add51283a1b7c5fa42f",
+    "fileType": "text",
+    "abstract": "The file contains meeting notes for Project Lantern, identified by Project ID LTN-204. It records that Mara confirmed the prototype is ready for review scheduled on October 15, 2026. Additionally, there is a request to reserve room Cedar for the review, utilizing the allocated review budget of EUR 240. These notes document key preparations and budgetary arrangements for the upcoming project review.",
+    "summary": "Meeting notes for Project Lantern confirm prototype readiness for an October 2026 review and request room Cedar reservation using a EUR 240 budget."
+  },
+  {
+    "filePath": "batch-2/other/lantern-festival.txt",
+    "fileHash": "6b530c2b5a8accb9b2756e512b2e7ebd",
+    "fileType": "text",
+    "abstract": "The file documents a catering order for the Lantern Festival, identified by Event ID FEST-811. The catering budget is set at EUR 240, and the event is scheduled for October 15, 2026. The contact person for this order is Noor. It is specified that this catering order is for a public festival, indicating the event's open and communal nature.",
+    "summary": "This file details a EUR 240 catering order for the public Lantern Festival on October 15, 2026, with Noor as the contact person."
+  }
+]
